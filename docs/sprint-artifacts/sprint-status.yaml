@@ -1,0 +1,144 @@
+# Sprint Status - Markdown WYSIWYG
+# Generated: 2025-12-11
+#
+# STATUS DEFINITIONS:
+#   backlog       - Not yet started
+#   ready-for-dev - Story file created with full context, ready for implementation
+#   in-progress   - Currently being implemented
+#   review        - Implementation complete, awaiting code review
+#   done          - Completed and merged
+
+project_name: Markdown WYSIWYG
+current_sprint: 1
+sprint_goal: "Complete Epic 1 - Foundation & Extension Setup"
+
+# Epic and Story Status Tracking
+development_status:
+  # Epic 1: Foundation & Extension Setup
+  epic-1: done
+  1-1-project-scaffold: done
+  1-2-custom-editor-provider: done
+  1-3-context-menu-command-palette: done
+  1-4-webview-react-shell: done
+  epic-1-retrospective: ready-for-dev
+
+  # Epic 2: Markdown Rendering & Basic Editing (Future)
+  epic-2: done
+  2-1-tiptap-editor-integration: done
+  2-2-markdown-content-rendering: done
+  2-3-click-to-edit-text-selection: done
+  2-4-text-input-deletion: done
+  2-5-bidirectional-sync: done
+  2-6-save-document: done
+  epic-2-retrospective: ready-for-dev
+
+  # Epic 3: Code Blocks & Syntax Highlighting (Future)
+  epic-3: done
+  3-1-code-block-rendering: done
+  3-2-syntax-highlighting: done  # Note: Optional AC7 (language label) deferred
+  epic-3-retrospective: ready-for-dev
+
+  # Epic 4: Formatting Toolbar & Polish (Future)
+  epic-4: done
+  4-1-persistent-toolbar: done
+  4-2-text-formatting-toolbar: done
+  4-3-structure-formatting-toolbar: done
+  4-4-undo-redo: done
+  epic-4-retrospective: ready-for-dev
+
+  # Epic 5: UI/UX Polish & Customization
+  epic-5: in-progress
+  5-1-improved-padding-spacing: done
+  5-2-auto-open-setting: review
+  5-3-theme-aware-toolbar: review
+  5-4-source-visual-toggle: review
+  5-5-mermaid-diagram-rendering: done
+  5-6-extension-controlled-fonts: review
+  5-7-hide-toolbar: done
+
+  # Epic 6: Table Support
+  epic-6: done
+  6-1-table-insertion-dialog: done
+  6-2-table-row-column-management: done
+  6-3-table-markdown-serialization: done
+
+  # Epic 7: Task Lists
+  epic-7: done
+  7-1-task-list-rendering: done
+  7-2-nested-task-lists: done
+
+  # Epic 8: Frontmatter Support
+  epic-8: done
+  8-1-frontmatter-detection-editing: done
+  8-2-frontmatter-toggle-ui: done
+
+  # Epic 9: Editor Customization
+  epic-9: done
+  9-1-card-layout-setting: done
+  9-2-content-padding-configuration: done
+  9-3-text-size-line-height: done
+  9-4-accent-color-themes: done
+
+  # Epic 10: Editor Lifecycle & Tab Management
+  epic-10: in-progress
+  10-1-document-editor-registry: review
+  10-2-synchronized-tab-closure: review
+  10-3-auto-open-loop-prevention: in-progress
+  10-4-auto-open-replaces-text-tab: review
+
+  # Epic 11: WYSIWYG Enhancements
+  epic-11: backlog
+  11-1-open-linked-files-wysiwyg: ready-for-dev
+  11-7-go-to-definition-header-anchors: review
+
+# Story Files Reference
+story_files:
+  1-1-project-scaffold: docs/sprint-artifacts/1-1-project-scaffold.md
+  1-2-custom-editor-provider: docs/sprint-artifacts/1-2-custom-editor-provider.md
+  1-3-context-menu-command-palette: docs/sprint-artifacts/1-3-context-menu-command-palette.md
+  1-4-webview-react-shell: docs/sprint-artifacts/1-4-webview-react-shell.md
+  2-1-tiptap-editor-integration: docs/sprint-artifacts/2-1-tiptap-editor-integration.md
+  2-2-markdown-content-rendering: docs/sprint-artifacts/2-2-markdown-content-rendering.md
+  2-3-click-to-edit-text-selection: docs/sprint-artifacts/2-3-click-to-edit-text-selection.md
+  2-4-text-input-deletion: docs/sprint-artifacts/2-4-text-input-deletion.md
+  2-5-bidirectional-sync: docs/sprint-artifacts/2-5-bidirectional-sync.md
+  2-6-save-document: docs/sprint-artifacts/2-6-save-document.md
+  3-1-code-block-rendering: docs/sprint-artifacts/3-1-code-block-rendering.md
+  3-2-syntax-highlighting: docs/sprint-artifacts/3-2-syntax-highlighting.md
+  4-1-persistent-toolbar: docs/sprint-artifacts/4-1-persistent-toolbar.md
+  4-2-text-formatting-toolbar: docs/sprint-artifacts/4-2-text-formatting-toolbar.md
+  4-3-structure-formatting-toolbar: docs/sprint-artifacts/4-3-structure-formatting-toolbar.md
+  4-4-undo-redo: docs/sprint-artifacts/4-4-undo-redo.md
+  5-1-improved-padding-spacing: docs/sprint-artifacts/5-1-improved-padding-spacing.md
+  5-2-auto-open-setting: docs/sprint-artifacts/5-2-auto-open-setting.md
+  5-3-theme-aware-toolbar: docs/sprint-artifacts/5-3-theme-aware-toolbar.md
+  5-4-source-visual-toggle: docs/sprint-artifacts/5-4-source-visual-toggle.md
+  5-5-mermaid-diagram-rendering: docs/sprint-artifacts/5-5-mermaid-diagram-rendering.md
+  5-6-extension-controlled-fonts: docs/sprint-artifacts/5-6-extension-controlled-fonts.md
+  5-7-hide-toolbar: docs/sprint-artifacts/5-7-hide-toolbar.md
+  6-1-table-insertion-dialog: docs/sprint-artifacts/6-1-table-insertion-dialog.md
+  6-2-table-row-column-management: docs/sprint-artifacts/6-2-table-row-column-management.md
+  6-3-table-markdown-serialization: docs/sprint-artifacts/6-3-table-markdown-serialization.md
+  7-1-task-list-rendering: docs/sprint-artifacts/7-1-task-list-rendering.md
+  7-2-nested-task-lists: docs/sprint-artifacts/7-2-nested-task-lists.md
+  8-1-frontmatter-detection-editing: docs/sprint-artifacts/8-1-frontmatter-detection-editing.md
+  8-2-frontmatter-toggle-ui: docs/sprint-artifacts/8-2-frontmatter-toggle-ui.md
+  9-1-card-layout-setting: docs/sprint-artifacts/9-1-card-layout-setting.md
+  9-2-content-padding-configuration: docs/sprint-artifacts/9-2-content-padding-configuration.md
+  9-3-text-size-line-height: docs/sprint-artifacts/9-3-text-size-line-height.md
+  9-4-accent-color-themes: docs/sprint-artifacts/9-4-accent-color-themes.md
+  10-1-document-editor-registry: docs/sprint-artifacts/10-1-document-editor-registry.md
+  10-2-synchronized-tab-closure: docs/sprint-artifacts/10-2-synchronized-tab-closure.md
+  10-3-auto-open-loop-prevention: docs/sprint-artifacts/10-3-auto-open-loop-prevention.md
+  10-4-auto-open-replaces-text-tab: docs/sprint-artifacts/10-4-auto-open-replaces-text-tab.md
+  11-1-open-linked-files-wysiwyg: docs/sprint-artifacts/11-1-open-linked-files-wysiwyg.md
+  11-7-go-to-definition-header-anchors: docs/sprint-artifacts/11-7-go-to-definition-header-anchors.md
+
+# Sprint Progress
+progress:
+  total_stories: 38
+  backlog: 0  # All stories drafted
+  ready_for_dev: 8  # 4 retrospectives + 10.2, 10.3, 11.1, 11.7
+  in_progress: 0
+  review: 6  # 5.2, 5.3, 5.4, 5.5, 5.6, 10.1
+  done: 29  # Epics 1-4, Epic 5 (5.1, 5.7), Epic 6-9 (all stories)

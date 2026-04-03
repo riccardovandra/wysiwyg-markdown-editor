@@ -1,0 +1,992 @@
+@import "tailwindcss";
+@config "../../../tailwind.config.js";
+@source "../**/*.{tsx,ts,html}";
+
+/* ============================================
+   Custom Dark Theme Design System
+   Default theme when not embedded in VS Code
+   ============================================ */
+
+:root {
+  color-scheme: dark;
+
+  /* Background hierarchy (darkest to lightest) */
+  --color-bg-base: #0f0f14;
+  --color-bg-elevated: #16161d;
+  --color-bg-surface: #1e1e28;
+  --color-bg-hover: #252532;
+  --color-bg-active: #2d2d3d;
+
+  /* Text hierarchy */
+  --color-text-primary: #e4e4e7;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+  --color-text-heading: #ffffff;
+
+  /* Accent colors (indigo/violet) */
+  --color-accent-primary: #6366f1;
+  --color-accent-hover: #818cf8;
+  --color-accent-muted: #4f46e5;
+  --color-accent-bg: rgba(99, 102, 241, 0.1);
+
+  /* Borders and separators */
+  --color-border-subtle: rgba(255, 255, 255, 0.06);
+  --color-border-default: rgba(255, 255, 255, 0.1);
+  --color-border-panel: rgba(255, 255, 255, 0.1);
+  --color-border-emphasis: rgba(255, 255, 255, 0.15);
+
+  /* Focus */
+  --color-focus-border: #007fd4;
+
+  /* Selection */
+  --color-selection-bg: rgba(99, 102, 241, 0.3);
+}
+
+/* VS Code embedded mode - inherit VS Code theme colors */
+body[data-vscode-theme-kind] {
+  --color-bg-base: var(--vscode-editor-background, #0f0f14);
+  --color-bg-elevated: var(--vscode-sideBar-background, #16161d);
+  --color-bg-surface: var(--vscode-textCodeBlock-background, #1e1e28);
+  --color-bg-hover: var(--vscode-toolbar-hoverBackground, #252532);
+  --color-bg-active: var(--vscode-toolbar-activeBackground, #2d2d3d);
+  --color-text-primary: var(--vscode-editor-foreground, #e4e4e7);
+  --color-text-secondary: var(--vscode-descriptionForeground, #a1a1aa);
+  --color-text-muted: var(--vscode-input-placeholderForeground, #71717a);
+  --color-border-default: var(--vscode-panel-border, rgba(255, 255, 255, 0.1));
+  --color-border-panel: var(--vscode-panel-border, rgba(255, 255, 255, 0.1));
+  --color-selection-bg: var(
+    --vscode-editor-selectionBackground,
+    rgba(99, 102, 241, 0.3)
+  );
+  --color-focus-border: var(--vscode-focusBorder, #007fd4);
+}
+
+/* ============================================
+   Accent Color Themes
+   Configurable via VS Code settings
+   ============================================ */
+
+/* Default: Indigo (lighter for better dark mode contrast) */
+body[data-accent-theme="indigo"] {
+  --color-accent-primary: #818cf8;
+  --color-accent-hover: #a5b4fc;
+  --color-accent-muted: #6366f1;
+  --color-accent-bg: rgba(129, 140, 248, 0.1);
+  --color-selection-bg: rgba(129, 140, 248, 0.3);
+}
+
+/* Blue theme */
+body[data-accent-theme="blue"] {
+  --color-accent-primary: #60a5fa;
+  --color-accent-hover: #93c5fd;
+  --color-accent-muted: #3b82f6;
+  --color-accent-bg: rgba(96, 165, 250, 0.1);
+  --color-selection-bg: rgba(96, 165, 250, 0.3);
+}
+
+/* Purple theme */
+body[data-accent-theme="purple"] {
+  --color-accent-primary: #a78bfa;
+  --color-accent-hover: #c4b5fd;
+  --color-accent-muted: #8b5cf6;
+  --color-accent-bg: rgba(167, 139, 250, 0.1);
+  --color-selection-bg: rgba(167, 139, 250, 0.3);
+}
+
+/* Teal theme - high contrast for dark mode */
+body[data-accent-theme="teal"] {
+  --color-accent-primary: #2dd4bf;
+  --color-accent-hover: #5eead4;
+  --color-accent-muted: #14b8a6;
+  --color-accent-bg: rgba(45, 212, 191, 0.1);
+  --color-selection-bg: rgba(45, 212, 191, 0.3);
+}
+
+/* Neutral theme - subtle, high readability */
+body[data-accent-theme="neutral"] {
+  --color-accent-primary: #d4d4d8;
+  --color-accent-hover: #e4e4e7;
+  --color-accent-muted: #a1a1aa;
+  --color-accent-bg: rgba(212, 212, 216, 0.1);
+  --color-selection-bg: rgba(212, 212, 216, 0.3);
+}
+
+/* ============================================
+   Configurable Typography
+   Set via CSS variables from App.tsx
+   ============================================ */
+
+:root {
+  /* Extension-controlled font settings */
+  --prose-font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, sans-serif;
+  --prose-font-size: 0.95rem; /* Default: medium */
+  --prose-line-height: 1.75; /* Default: normal */
+}
+
+/* ============================================
+   Base Styles
+   ============================================ */
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  /* Use extension-controlled font family for prose content */
+  font-family: var(--prose-font-family);
+  font-size: var(--vscode-font-size, 14px);
+}
+
+/* ============================================
+   Editor Prose Styling (Story 5.1)
+   AC2: Heading spacing
+   AC3: Paragraph line height
+   AC4: List item spacing
+   ============================================ */
+
+/* Allow prose to use its default max-width (65ch) for optimal readability */
+/* Container in Editor.tsx handles overall width constraint */
+
+/* Enhanced heading styling with accent colors */
+.prose h1 {
+  color: var(--color-accent-primary);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-top: 0;
+  margin-bottom: 0.875em;
+}
+
+.prose h2 {
+  color: color-mix(
+    in srgb,
+    var(--color-accent-primary) 85%,
+    var(--color-text-heading)
+  );
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+.prose h3 {
+  color: color-mix(
+    in srgb,
+    var(--color-accent-primary) 70%,
+    var(--color-text-heading)
+  );
+  font-weight: 600;
+  margin-top: 0.4em;
+  margin-bottom: 0.4em;
+}
+
+.prose h4,
+.prose h5,
+.prose h6 {
+  color: color-mix(
+    in srgb,
+    var(--color-accent-primary) 55%,
+    var(--color-text-heading)
+  );
+  margin-top: 0.35em;
+  margin-bottom: 0.35em;
+}
+
+/* Comfortable paragraph spacing */
+.prose p {
+  color: var(--color-text-primary);
+  font-size: var(--prose-font-size, 0.95rem);
+  margin-top: 1em;
+  margin-bottom: 1em;
+  line-height: var(--prose-line-height, 1.75);
+}
+
+/* Bold text with accent color */
+.prose strong {
+  color: var(--color-accent-primary);
+  font-weight: 600;
+}
+
+/* Bold text without accent color (when disabled) */
+body[data-disable-bold-accent="true"] .prose strong {
+  color: var(--color-text-primary);
+}
+
+/* Italic text with accent color */
+.prose em {
+  color: var(--color-accent-primary);
+}
+
+/* Link styling with accent color */
+.prose a {
+  color: var(--color-accent-primary);
+  text-decoration: none;
+  border-bottom: 1px solid var(--color-accent-primary);
+  transition: all 0.15s ease;
+}
+
+.prose a:hover {
+  color: var(--color-accent-hover);
+  border-bottom-color: var(--color-accent-hover);
+}
+
+/* First paragraph after heading needs less top margin */
+.prose h1 + p,
+.prose h2 + p,
+.prose h3 + p,
+.prose h4 + p {
+  margin-top: 0.5em;
+}
+
+/* List spacing */
+.prose ul,
+.prose ol {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+  padding-left: 1.5em;
+}
+
+.prose li {
+  font-size: var(--prose-font-size, 0.95rem);
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+/* Horizontal rule (divider) */
+.prose hr {
+  border: none;
+  border-top: 1px solid var(--color-border-default);
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
+/* Nested list adjustments */
+.prose li > ul,
+.prose li > ol {
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+/* ============================================
+   Task List Styling (Checkboxes)
+   ============================================ */
+
+/* Task list container - remove default list styling */
+.task-list,
+ul[data-type="taskList"] {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+
+/* Task list item - flex layout for checkbox alignment */
+.task-item,
+li[data-type="taskItem"] {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: flex-start !important;
+  gap: 0.5rem !important;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+}
+
+/* Task item label container - contains only checkbox, should not grow */
+.task-item > label,
+li[data-type="taskItem"] > label {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  cursor: pointer;
+  flex: 0 0 auto !important;
+  margin-top: 0.25em;
+}
+
+/* Hide the empty span inside label */
+.task-item > label > span,
+li[data-type="taskItem"] > label > span {
+  display: none !important;
+}
+
+/* Text content div - sibling of label, should grow */
+.task-item > div,
+li[data-type="taskItem"] > div {
+  flex: 1 1 auto !important;
+  min-width: 0;
+}
+
+/* Checkbox styling - custom appearance */
+.task-item input[type="checkbox"],
+li[data-type="taskItem"] input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 1rem !important;
+  height: 1rem !important;
+  min-width: 1rem !important;
+  border: 2px solid var(--color-border-emphasis) !important;
+  border-radius: 0.25rem !important;
+  background-color: transparent !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  transition: all 0.15s ease;
+  position: relative !important;
+}
+
+.task-item input[type="checkbox"]:hover,
+li[data-type="taskItem"] input[type="checkbox"]:hover {
+  border-color: var(--color-accent-primary) !important;
+  background-color: var(--color-accent-bg) !important;
+}
+
+.task-item input[type="checkbox"]:checked,
+li[data-type="taskItem"] input[type="checkbox"]:checked {
+  background-color: var(--color-accent-primary) !important;
+  border-color: var(--color-accent-primary) !important;
+}
+
+/* Checkmark icon for checked state */
+.task-item input[type="checkbox"]:checked::after,
+li[data-type="taskItem"] input[type="checkbox"]:checked::after {
+  content: "" !important;
+  position: absolute !important;
+  width: 0.3rem !important;
+  height: 0.5rem !important;
+  border: solid white !important;
+  border-width: 0 2px 2px 0 !important;
+  transform: rotate(45deg) !important;
+  top: 45% !important;
+  left: 50% !important;
+  margin-top: -0.3rem !important;
+  margin-left: -0.1rem !important;
+}
+
+/* Checked item text - muted color (no strikethrough per user preference) */
+.task-item[data-checked="true"] > div,
+li[data-type="taskItem"][data-checked="true"] > div {
+  color: var(--color-text-muted);
+}
+
+/* Task item text content */
+.task-item > div,
+li[data-type="taskItem"] > div {
+  font-size: var(--prose-font-size, 0.95rem);
+  line-height: var(--prose-line-height, 1.75);
+}
+
+/* Remove paragraph margin inside task items */
+.task-item > div > p,
+li[data-type="taskItem"] > div > p {
+  margin: 0 !important;
+}
+
+/* Nested task lists */
+.task-item ul[data-type="taskList"],
+li[data-type="taskItem"] ul[data-type="taskList"] {
+  margin-top: 0.25em;
+  margin-left: 1.5rem;
+}
+
+/* Blockquote styling with accent border */
+.prose blockquote {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  padding: 0.75em 1em;
+  border-left: 4px solid var(--color-accent-primary);
+  background: var(--color-accent-bg);
+  border-radius: 0 0.5rem 0.5rem 0;
+  font-style: italic;
+  color: var(--color-text-secondary);
+}
+
+/* Selection color with accent */
+::selection {
+  background-color: var(--color-selection-bg);
+}
+
+/* ProseMirror text selection highlighting */
+.ProseMirror ::selection {
+  background-color: var(--color-selection-bg);
+}
+
+/* Node selection (for blocks like images, code blocks) */
+.ProseMirror .ProseMirror-selectednode {
+  outline: 2px solid var(--vscode-focusBorder, #007acc);
+}
+
+/* Cursor styling */
+.ProseMirror .ProseMirror-cursor {
+  border-left-color: var(--vscode-editorCursor-foreground, currentColor);
+}
+
+/* TipTap placeholder styling */
+.tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  color: var(--vscode-input-placeholderForeground, #a0a0a0);
+  pointer-events: none;
+  height: 0;
+}
+
+/* TipTap editor focus outline */
+.tiptap:focus {
+  outline: none;
+}
+
+/* TipTap ProseMirror container */
+.ProseMirror {
+  outline: none;
+  min-height: 100%;
+}
+
+.ProseMirror:focus {
+  outline: none;
+}
+
+/* ============================================
+   Code Block Styling (Story 3.1 + Story 5.1)
+   AC1: Container styling
+   AC2: Monospace font
+   AC3: Background color distinction
+   AC4: Horizontal scrolling
+   AC5: Visual padding (enhanced for 5.1)
+   AC6: Visual separation (enhanced for 5.1)
+   ============================================ */
+
+/* Code block container - pre element */
+.ProseMirror pre {
+  background-color: var(--color-bg-surface);
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  margin: 0.75rem 0;
+  border: 1px solid var(--color-border-subtle);
+}
+
+/* Code blocks in prose context */
+.prose pre {
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+}
+
+/* Code blocks use CSS variables that adapt to theme automatically */
+
+/* Code text styling - monospace font */
+.ProseMirror pre code {
+  font-family: var(
+    --vscode-editor-fontFamily,
+    "JetBrains Mono",
+    "Fira Code",
+    "Consolas",
+    monospace
+  );
+  font-size: 0.875rem;
+  line-height: 1.6;
+  white-space: pre;
+  color: var(--color-text-primary);
+  background: transparent;
+  padding: 0;
+  display: block;
+}
+
+/* Note: .prose pre styles inherit from .ProseMirror pre above.
+   Tailwind's prose class is applied to the same container,
+   so no duplicate styles needed here. */
+
+/* Inline code styling (backticks) */
+.ProseMirror code:not(pre code) {
+  font-family: var(
+    --vscode-editor-fontFamily,
+    "JetBrains Mono",
+    "Fira Code",
+    "Consolas",
+    monospace
+  );
+  font-size: 0.875em;
+  background-color: var(--color-accent-bg);
+  color: var(--color-accent-hover);
+  padding: 0.2em 0.4em;
+  border-radius: 0.375rem;
+}
+
+/* Inline code uses CSS variables that adapt to theme automatically */
+
+/* ============================================
+   Syntax Highlighting (Story 3.2)
+   AC1: Language-specific highlighting
+   AC5: Theme-aware colors
+   ============================================ */
+
+/* Comments and quotes */
+.hljs-comment,
+.hljs-quote {
+  color: var(--vscode-editorLineNumber-foreground, #6a737d);
+  font-style: italic;
+}
+
+/* Keywords (if, else, function, const, let, var, return, etc.) */
+.hljs-keyword,
+.hljs-selector-tag {
+  color: var(--vscode-symbolIcon-keywordForeground, #d73a49);
+}
+
+/* Strings */
+.hljs-string,
+.hljs-doctag,
+.hljs-regexp {
+  color: var(--vscode-symbolIcon-stringForeground, #032f62);
+}
+
+/* Numbers */
+.hljs-number,
+.hljs-literal {
+  color: var(--vscode-symbolIcon-numberForeground, #005cc5);
+}
+
+/* Built-in types and classes */
+.hljs-built_in,
+.hljs-type,
+.hljs-class .hljs-title {
+  color: var(--vscode-symbolIcon-classForeground, #6f42c1);
+}
+
+/* Function names and definitions */
+.hljs-title,
+.hljs-title.function_,
+.hljs-section {
+  color: var(--vscode-symbolIcon-functionForeground, #6f42c1);
+}
+
+/* Variables and parameters */
+.hljs-variable,
+.hljs-template-variable,
+.hljs-params {
+  color: var(--vscode-symbolIcon-variableForeground, #e36209);
+}
+
+/* HTML/XML tags and attributes */
+.hljs-name,
+.hljs-tag {
+  color: var(--vscode-symbolIcon-colorForeground, #22863a);
+}
+
+.hljs-attr,
+.hljs-attribute {
+  color: var(--vscode-symbolIcon-propertyForeground, #6f42c1);
+}
+
+/* Symbols, bullets, links */
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+  color: var(--vscode-symbolIcon-referenceForeground, #005cc5);
+}
+
+/* Meta information */
+.hljs-meta,
+.hljs-meta .hljs-keyword,
+.hljs-meta .hljs-string {
+  color: var(--vscode-symbolIcon-snippetForeground, #005cc5);
+}
+
+/* Additions (diff) */
+.hljs-addition {
+  color: #22863a;
+  background-color: rgba(34, 134, 58, 0.1);
+}
+
+/* Deletions (diff) */
+.hljs-deletion {
+  color: #b31d28;
+  background-color: rgba(179, 29, 40, 0.1);
+}
+
+/* Text formatting */
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: bold;
+}
+
+/* Selector classes and IDs (CSS) */
+.hljs-selector-class,
+.hljs-selector-id {
+  color: var(--vscode-symbolIcon-classForeground, #6f42c1);
+}
+
+.hljs-selector-pseudo,
+.hljs-selector-attr {
+  color: var(--vscode-symbolIcon-functionForeground, #22863a);
+}
+
+/* Property names (CSS, JSON) */
+.hljs-property {
+  color: var(--vscode-symbolIcon-propertyForeground, #005cc5);
+}
+
+/* ============================================
+   Dark Theme Overrides (Story 3.2 - AC5)
+   ============================================ */
+
+/* Dark theme: Comments */
+@media (prefers-color-scheme: dark) {
+  .hljs-comment,
+  .hljs-quote {
+    color: #8b949e;
+  }
+}
+
+body[data-vscode-theme-kind="vscode-dark"] .hljs-comment,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-quote,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-comment,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-quote,
+.dark .hljs-comment,
+.dark .hljs-quote {
+  color: #8b949e;
+}
+
+/* Dark theme: Keywords */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-keyword,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-selector-tag,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-keyword,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-selector-tag,
+.dark .hljs-keyword,
+.dark .hljs-selector-tag {
+  color: #ff7b72;
+}
+
+/* Dark theme: Strings */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-string,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-doctag,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-regexp,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-string,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-doctag,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-regexp,
+.dark .hljs-string,
+.dark .hljs-doctag,
+.dark .hljs-regexp {
+  color: #a5d6ff;
+}
+
+/* Dark theme: Numbers */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-number,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-literal,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-number,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-literal,
+.dark .hljs-number,
+.dark .hljs-literal {
+  color: #79c0ff;
+}
+
+/* Dark theme: Built-in types */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-built_in,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-type,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-class .hljs-title,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-built_in,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-type,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-class .hljs-title,
+.dark .hljs-built_in,
+.dark .hljs-type,
+.dark .hljs-class .hljs-title {
+  color: #d2a8ff;
+}
+
+/* Dark theme: Functions */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-title,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-title.function_,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-section,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-title,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-title.function_,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-section,
+.dark .hljs-title,
+.dark .hljs-title.function_,
+.dark .hljs-section {
+  color: #d2a8ff;
+}
+
+/* Dark theme: Variables */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-variable,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-template-variable,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-params,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-variable,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-template-variable,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-params,
+.dark .hljs-variable,
+.dark .hljs-template-variable,
+.dark .hljs-params {
+  color: #ffa657;
+}
+
+/* Dark theme: HTML/XML tags */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-name,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-tag,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-name,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-tag,
+.dark .hljs-name,
+.dark .hljs-tag {
+  color: #7ee787;
+}
+
+/* Dark theme: Attributes */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-attr,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-attribute,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-attr,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-attribute,
+.dark .hljs-attr,
+.dark .hljs-attribute {
+  color: #d2a8ff;
+}
+
+/* Dark theme: Meta */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-meta,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-meta,
+.dark .hljs-meta {
+  color: #79c0ff;
+}
+
+/* Dark theme: Property names */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-property,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-property,
+.dark .hljs-property {
+  color: #79c0ff;
+}
+
+/* Dark theme: Selectors */
+body[data-vscode-theme-kind="vscode-dark"] .hljs-selector-class,
+body[data-vscode-theme-kind="vscode-dark"] .hljs-selector-id,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-selector-class,
+body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-selector-id,
+.dark .hljs-selector-class,
+.dark .hljs-selector-id {
+  color: #d2a8ff;
+}
+
+/* ============================================
+   Table Styling
+   ============================================ */
+
+/* Table container */
+.prose table {
+  width: auto;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75em;
+  margin-bottom: 0.75em;
+  font-size: var(--prose-font-size, 0.95rem);
+}
+
+/* Table header cells */
+.prose th {
+  background-color: var(--color-bg-surface);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+  white-space: nowrap;
+}
+
+/* Table data cells */
+.prose td {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border-default);
+  color: var(--color-text-primary);
+  vertical-align: top;
+  white-space: nowrap;
+}
+
+/* Alternating row colors */
+.prose tr:nth-child(even) td {
+  background-color: var(--color-bg-elevated);
+}
+
+.prose tr:nth-child(odd) td {
+  background-color: transparent;
+}
+
+/* TipTap table selection styling */
+.ProseMirror table {
+  width: auto;
+  max-width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+  table-layout: auto;
+  overflow: hidden;
+}
+
+.ProseMirror th,
+.ProseMirror td {
+  min-width: 1em;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-border-default);
+  vertical-align: top;
+  box-sizing: border-box;
+  position: relative;
+  white-space: nowrap;
+}
+
+.ProseMirror th {
+  background-color: var(--color-bg-surface);
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Selected cell highlight */
+.ProseMirror .selectedCell:after {
+  z-index: 2;
+  position: absolute;
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background: var(--color-selection-bg);
+  pointer-events: none;
+}
+
+/* Column resize handle */
+.ProseMirror .column-resize-handle {
+  position: absolute;
+  right: -2px;
+  top: 0;
+  bottom: -2px;
+  width: 4px;
+  background-color: var(--color-accent-primary);
+  pointer-events: none;
+}
+
+/* Table resize cursor */
+.ProseMirror.resize-cursor {
+  cursor: col-resize;
+}
+
+/* Paragraph inside table cells */
+.ProseMirror td > p,
+.ProseMirror th > p {
+  margin: 0;
+}
+
+/* Focus styling for table */
+.ProseMirror table:focus-within {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 2px;
+}
+
+/* Responsive table - allow wrapping on smaller screens */
+@media (max-width: 768px) {
+  .prose th,
+  .prose td,
+  .ProseMirror th,
+  .ProseMirror td {
+    white-space: normal;
+  }
+}
+
+/* ============================================
+   Inline Checkbox Styling (Table Cells)
+   ============================================ */
+
+/* Inline checkbox wrapper */
+.inline-checkbox-wrapper,
+span[data-type="inline-checkbox"] {
+  display: inline-flex;
+  align-items: center;
+  vertical-align: middle;
+  margin-right: 0.35rem;
+  user-select: none;
+}
+
+/* Inline checkbox input - custom appearance */
+.inline-checkbox-input,
+span[data-type="inline-checkbox"] input[type="checkbox"] {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 0.9rem !important;
+  height: 0.9rem !important;
+  min-width: 0.9rem !important;
+  border: 2px solid var(--color-border-emphasis) !important;
+  border-radius: 0.2rem !important;
+  background-color: transparent !important;
+  cursor: pointer !important;
+  margin: 0 !important;
+  transition: all 0.15s ease;
+  position: relative !important;
+  vertical-align: middle;
+}
+
+.inline-checkbox-input:hover,
+span[data-type="inline-checkbox"] input[type="checkbox"]:hover {
+  border-color: var(--color-accent-primary) !important;
+  background-color: var(--color-accent-bg) !important;
+}
+
+.inline-checkbox-input:checked,
+span[data-type="inline-checkbox"] input[type="checkbox"]:checked {
+  background-color: var(--color-accent-primary) !important;
+  border-color: var(--color-accent-primary) !important;
+}
+
+/* Checkmark icon for checked state */
+.inline-checkbox-input:checked::after,
+span[data-type="inline-checkbox"] input[type="checkbox"]:checked::after {
+  content: "" !important;
+  position: absolute !important;
+  width: 0.25rem !important;
+  height: 0.4rem !important;
+  border: solid white !important;
+  border-width: 0 2px 2px 0 !important;
+  transform: rotate(45deg) !important;
+  top: 45% !important;
+  left: 50% !important;
+  margin-top: -0.25rem !important;
+  margin-left: -0.08rem !important;
+}
+
+/* Ensure inline checkbox works well in table cells */
+.ProseMirror td .inline-checkbox-wrapper,
+.ProseMirror th .inline-checkbox-wrapper {
+  margin-right: 0.5rem;
+}
+
+/* ============================================
+   Frontmatter Editor (Story 12.1)
+   Collapsible YAML block with syntax highlighting
+   ============================================ */
+
+/* Dual-layer editor: textarea + pre must share identical typography */
+.frontmatter-editor-wrapper {
+  min-height: 80px;
+}
+
+.frontmatter-highlight,
+.frontmatter-textarea {
+  font-family: var(
+    --vscode-editor-fontFamily,
+    "JetBrains Mono",
+    "Fira Code",
+    "Consolas",
+    monospace
+  );
+  font-size: 0.875rem;
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+/* Ensure the highlight layer matches textarea dimensions */
+.frontmatter-highlight {
+  color: var(--color-text-primary);
+}
+
+/* Textarea caret visibility on transparent background */
+.frontmatter-textarea {
+  caret-color: var(--color-text-primary);
+}
+
+/* Selection styling in the transparent textarea */
+.frontmatter-textarea::selection {
+  background-color: var(--color-selection-bg);
+  color: transparent;
+}
