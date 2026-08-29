@@ -11,7 +11,8 @@ interface UseLinkClickHandlerOptions {
 
 /**
  * Hook that handles clicks on links within the TipTap editor.
- * Uses DOM event delegation to capture all link clicks.
+ * Uses DOM event delegation to capture all link clicks, both <a> elements
+ * (Link mark) and URLs decorated inside code by the CodeLinks extension.
  *
  * Anchor-only links (href starting with #) are handled locally via onAnchorClick.
  * File and external links are forwarded to onLinkClick for extension handling.
@@ -27,17 +28,19 @@ export function useLinkClickHandler({
 }: UseLinkClickHandlerOptions): void {
   const handleClick = useCallback(
     (event: MouseEvent) => {
-      // Find the anchor element - could be the target or an ancestor
+      // Find the link element - could be the target or an ancestor.
+      // Either a real <a> (Link mark) or a URL decorated inside code (CodeLinks).
       const target = event.target as HTMLElement;
       const anchor = target.closest('a');
+      const codeLink = anchor ? null : target.closest<HTMLElement>('.code-link[data-href]');
 
-      if (anchor && anchor.href) {
+      if (anchor || codeLink) {
         // Prevent default browser navigation
         event.preventDefault();
         event.stopPropagation();
 
-        // Extract the href attribute
-        const href = anchor.getAttribute('href');
+        // Extract the href
+        const href = anchor ? anchor.getAttribute('href') : codeLink?.dataset.href;
         if (!href) return;
 
         // Check if this is an anchor-only link (starts with #)

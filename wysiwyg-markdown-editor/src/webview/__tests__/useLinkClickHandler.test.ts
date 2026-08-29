@@ -187,6 +187,65 @@ describe('useLinkClickHandler', () => {
     expect(newOnLinkClick).toHaveBeenCalledTimes(1);
   });
 
+  describe('code link handling (CodeLinks decorations)', () => {
+    it('calls onLinkClick with data-href when a decorated URL in a code block is clicked', () => {
+      const codeDom = document.createElement('div');
+      codeDom.innerHTML =
+        '<pre><code>see <span class="code-link" data-href="https://example.com/x">https://example.com/x</span></code></pre>';
+      mockEditor.view.dom.appendChild(codeDom);
+
+      renderHook(() =>
+        useLinkClickHandler({
+          editor: mockEditor as any,
+          onLinkClick,
+        })
+      );
+
+      const span = codeDom.querySelector('.code-link');
+      const clickEvent = new MouseEvent('click', { bubbles: true, cancelable: true });
+      const preventDefaultSpy = vi.spyOn(clickEvent, 'preventDefault');
+      span!.dispatchEvent(clickEvent);
+
+      expect(onLinkClick).toHaveBeenCalledWith('https://example.com/x');
+      expect(preventDefaultSpy).toHaveBeenCalled();
+    });
+
+    it('handles clicks on nested highlight spans inside a code link', () => {
+      const codeDom = document.createElement('div');
+      codeDom.innerHTML =
+        '<pre><code><span class="code-link" data-href="https://example.com/y"><span class="hljs-link">https://example.com/y</span></span></code></pre>';
+      mockEditor.view.dom.appendChild(codeDom);
+
+      renderHook(() =>
+        useLinkClickHandler({
+          editor: mockEditor as any,
+          onLinkClick,
+        })
+      );
+
+      codeDom.querySelector('.hljs-link')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+      expect(onLinkClick).toHaveBeenCalledWith('https://example.com/y');
+    });
+
+    it('ignores code text that is not a decorated link', () => {
+      const codeDom = document.createElement('div');
+      codeDom.innerHTML = '<pre><code>const x = 1;</code></pre>';
+      mockEditor.view.dom.appendChild(codeDom);
+
+      renderHook(() =>
+        useLinkClickHandler({
+          editor: mockEditor as any,
+          onLinkClick,
+        })
+      );
+
+      codeDom.querySelector('code')!.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+      expect(onLinkClick).not.toHaveBeenCalled();
+    });
+  });
+
   describe('anchor link handling (Story 11-7)', () => {
     it('does NOT call onLinkClick for anchor-only links', () => {
       // Add anchor link with # href

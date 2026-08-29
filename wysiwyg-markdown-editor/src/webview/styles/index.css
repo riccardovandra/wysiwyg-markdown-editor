@@ -512,6 +512,19 @@ li[data-type="taskItem"] ul[data-type="taskList"] {
 
 /* Inline code uses CSS variables that adapt to theme automatically */
 
+/* URLs inside code blocks and inline code (decorated by the CodeLinks extension) */
+.ProseMirror .code-link {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 2px;
+}
+
+.ProseMirror .code-link:hover {
+  color: var(--color-accent-hover);
+  text-decoration-style: solid;
+}
+
 /* ============================================
    Syntax Highlighting (Story 3.2)
    AC1: Language-specific highlighting

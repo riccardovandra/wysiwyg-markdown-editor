@@ -15,6 +15,7 @@ import { MermaidBlock } from "../extensions/MermaidBlock";
 import { HeadingWithId } from "../extensions/HeadingWithId";
 import { CommentMark } from "../extensions/CommentMark";
 import { CommentAnchor } from "../extensions/CommentAnchor";
+import { CodeLinks } from "../extensions/CodeLinks";
 import { createLowlight } from "lowlight";
 
 // Import specific languages for smaller bundle size (~50KB vs ~1MB for all)
@@ -159,6 +160,8 @@ export function useTipTapEditor(
       }),
       Link.configure({
         openOnClick: false,
+        // linkHandler.ts (extension side) already resolves file:// links
+        protocols: ["file"],
         HTMLAttributes: {
           class: "text-blue-500 underline cursor-pointer",
         },
@@ -175,6 +178,8 @@ export function useTipTapEditor(
       InlineCheckbox,
       CommentMark,
       CommentAnchor,
+      // Clickable URLs inside code blocks and inline code
+      CodeLinks,
       Image.configure({
         inline: false,
         allowBase64: true,
