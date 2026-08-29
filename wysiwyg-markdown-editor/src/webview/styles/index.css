@@ -1022,18 +1022,20 @@ span[data-type="inline-checkbox"] input[type="checkbox"]:checked::after {
    ============================================ */
 
 :root {
-  --comment-hl: rgba(251, 191, 36, 0.26);
-  --comment-hl-strong: rgba(251, 191, 36, 0.5);
-  --comment-line: #f59e0b;
-  --comment-ink: #fcd34d;
+  /* Comments follow the accent theme */
+  --comment-hl: color-mix(in srgb, var(--color-accent-primary) 16%, transparent);
+  --comment-hl-strong: color-mix(in srgb, var(--color-accent-primary) 34%, transparent);
+  --comment-line: var(--color-accent-primary);
+  --comment-ink: var(--color-accent-hover);
 }
 
-body[data-vscode-theme-kind="vscode-light"],
-body[data-vscode-theme-kind="vscode-high-contrast-light"] {
-  --comment-hl: rgba(245, 158, 11, 0.3);
-  --comment-hl-strong: rgba(245, 158, 11, 0.55);
-  --comment-line: #d97706;
-  --comment-ink: #92400e;
+/* Wrapper around the card: reserves the gutter when the pane is too narrow
+   for an outside margin. --comment-gutter is set by CommentGutter. */
+.comment-layout {
+  box-sizing: border-box;
+  max-width: calc(56rem + var(--comment-gutter, 0px));
+  padding-left: var(--comment-gutter, 0px);
+  transition: padding-left 0.2s ease, max-width 0.2s ease;
 }
 
 /* Highlighted text */

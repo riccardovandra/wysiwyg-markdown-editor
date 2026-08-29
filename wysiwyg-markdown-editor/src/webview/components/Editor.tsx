@@ -42,7 +42,7 @@ export function Editor({ editor, showCard = true, contentPadding = 'medium' }: E
   return (
     <div className="min-h-full">
       {/* The wrapper is the positioning context for comment bubbles and the floating button */}
-      <div ref={containerRef} className="relative max-w-4xl mx-auto">
+      <div ref={containerRef} className="comment-layout relative mx-auto">
         <div className={cardClasses}>
           <div className={padding}>
             <EditorContent

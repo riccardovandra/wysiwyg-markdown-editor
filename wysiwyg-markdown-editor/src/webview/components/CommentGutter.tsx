@@ -8,8 +8,29 @@ import { TextSelection } from '@tiptap/pm/state';
 export const BUBBLE_WIDTH = 260;
 const GAP = 16;
 const STACK_GAP = 10;
-const COMPACT_PIN_LEFT = -34;
+/** Pins sit inside the card's left padding so they are never clipped. */
+const COMPACT_PIN_LEFT = 8;
 const COMPACT_STACK = 28;
+/** Reading column width the card is designed for (Tailwind max-w-4xl). */
+const CARD_MAX_WIDTH = 896;
+/** Below this card width, reserving a gutter is worse than pins. */
+const MIN_CARD_WIDTH = 520;
+
+/**
+ * margin:   enough free space left of the centered card, bubbles live there.
+ * reserved: the pane is narrower, the layout reserves a gutter and the card shifts right.
+ * compact:  no room for either, comments collapse to pins inside the card.
+ */
+type LayoutMode = 'margin' | 'reserved' | 'compact';
+
+export function pickLayoutMode(paneWidth: number, hasComments: boolean): LayoutMode {
+  const gutter = BUBBLE_WIDTH + GAP;
+  const free = Math.max(0, (paneWidth - CARD_MAX_WIDTH) / 2);
+  if (free >= gutter) return 'margin';
+  if (!hasComments) return 'margin';
+  if (paneWidth - gutter >= MIN_CARD_WIDTH) return 'reserved';
+  return 'compact';
+}
 
 export interface CommentItem {
   id: string;
@@ -97,11 +118,13 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
   const [tops, setTops] = useState<Record<string, number>>({});
   const [target, setTarget] = useState<SelectionTarget | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
-  const [compact, setCompact] = useState(false);
+  const [mode, setMode] = useState<LayoutMode>('margin');
+  const compact = mode === 'compact';
   const [openId, setOpenId] = useState<string | null>(null);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
   const bubbleRefs = useRef(new Map<string, HTMLDivElement>());
+  const pendingDraftRef = useRef(false);
 
   const refresh = useCallback(() => {
     if (!editor || editor.isDestroyed || !containerRef.current) return;
@@ -120,7 +143,11 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
     });
     setItems(next);
     setRawTops(nextTops);
-    setCompact(containerRef.current.getBoundingClientRect().left < BUBBLE_WIDTH + GAP + 8);
+    const pane = containerRef.current.parentElement?.clientWidth ?? window.innerWidth;
+    const nextMode = pickLayoutMode(pane, next.length > 0 || pendingDraftRef.current);
+    setMode(nextMode);
+    // The wrapper reserves the gutter through this variable (see .comment-layout in index.css).
+    containerRef.current.style.setProperty('--comment-gutter', nextMode === 'reserved' ? `${BUBBLE_WIDTH + GAP}px` : '0px');
   }, [editor, containerRef]);
 
   // Keep the list in sync with the document.
@@ -235,12 +262,16 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
     }
     setRawTops((prev) => ({ ...prev, draft: target.top }));
     setTarget(null);
-  }, [editor, target]);
+    pendingDraftRef.current = true;
+    refresh();
+  }, [editor, target, refresh]);
 
   const cancelDraft = useCallback(() => {
     editor?.commands.setPendingComment(null);
     setDraft(null);
-  }, [editor]);
+    pendingDraftRef.current = false;
+    refresh();
+  }, [editor, refresh]);
 
   const submitDraft = useCallback(
     (text: string) => {
@@ -254,6 +285,7 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
         editor.chain().addCommentAnchor(draft.pos, note).setTextSelection(draft.from).focus().run();
       }
       setDraft(null);
+      pendingDraftRef.current = false;
     },
     [editor, draft],
   );
@@ -277,7 +309,7 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
 
   if (!editor) return null;
 
-  const bubbleLeft = compact ? 0 : -(BUBBLE_WIDTH + GAP);
+  const bubbleLeft = mode === 'margin' ? -(BUBBLE_WIDTH + GAP) : mode === 'reserved' ? 0 : COMPACT_PIN_LEFT;
   const buttonLabel = target?.anchorAfter !== undefined ? 'Comment on block' : 'Comment';
 
   return (
