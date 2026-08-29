@@ -9,6 +9,7 @@ Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how 
 ### Added
 
 - Comments: select text and press Comment to leave a note in the left margin. Comments are stored inline as CriticMarkup (`{==text==}{>>note<<}`), so agents can read and resolve them directly in the file. Threads, replies, and comments on code blocks are supported.
+- Comments toggle in the toolbar (and floating next to the toolbar chevron) with a count badge. Comments are hidden by default and shown when you add one; setting `markdownWysiwyg.showComments`.
 - Comment history: resolved comments are appended to `<name>.comments.md` next to the document (setting `markdownWysiwyg.commentHistory`).
 - Command "Copy Agent Instructions for Comments" with a protocol for applying comments with an AI agent.
 - Standalone browser harness (`src/webview/dev.html`) for developing the webview without VS Code.

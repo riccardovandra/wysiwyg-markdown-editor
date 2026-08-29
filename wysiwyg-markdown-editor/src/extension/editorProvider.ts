@@ -109,6 +109,7 @@ function getEditorSettings(): EditorSettings {
 	return {
 		hideToolbar: config.get<boolean>('hideToolbar', false),
 		showCard: config.get<boolean>('showCard', true),
+		showComments: config.get<boolean>('showComments', false),
 		contentPadding: config.get<'compact' | 'medium' | 'spacious'>('contentPadding', 'medium'),
 		textSize: config.get<'small' | 'medium' | 'large'>('textSize', 'medium'),
 		lineHeight: config.get<'tight' | 'compact' | 'normal' | 'relaxed'>('lineHeight', 'normal'),

@@ -24,6 +24,7 @@ import {
   Eye,
   Code2,
   Image as ImageIcon,
+  MessageSquare,
 } from 'lucide-react';
 
 /**
@@ -44,6 +45,12 @@ export interface ToolbarProps {
   viewMode?: 'visual' | 'source';
   /** Optional callback to toggle between visual and source views */
   onToggleViewMode?: () => void;
+  /** Whether comment highlights and margin bubbles are shown */
+  showComments?: boolean;
+  /** Number of comments in the document (shown as a badge) */
+  commentCount?: number;
+  /** Optional callback to toggle comment visibility */
+  onToggleComments?: () => void;
 }
 
 /**
@@ -125,6 +132,9 @@ export function Toolbar({
   onToggleFrontmatter,
   viewMode,
   onToggleViewMode,
+  showComments,
+  commentCount = 0,
+  onToggleComments,
 }: ToolbarProps) {
   const iconSize = 'w-4 h-4';
   const isDisabled = !editor;
@@ -391,6 +401,27 @@ export function Toolbar({
             onClick={onToggleViewMode}
             disabled={false}
           />
+        </>
+      )}
+
+      {/* Comments Toggle */}
+      {onToggleComments && (
+        <>
+          <ToolbarDivider />
+          <span className="relative inline-flex">
+            <ToolbarButton
+              icon={<MessageSquare className={iconSize} />}
+              tooltip={showComments ? 'Hide Comments' : 'Show Comments'}
+              isActive={showComments}
+              onClick={onToggleComments}
+              disabled={false}
+            />
+            {commentCount > 0 && (
+              <span className="comment-badge" aria-label={`${commentCount} comments`}>
+                {commentCount}
+              </span>
+            )}
+          </span>
         </>
       )}
 

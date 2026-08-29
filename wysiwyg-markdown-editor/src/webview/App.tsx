@@ -7,6 +7,7 @@ import { Editor } from "./components/Editor";
 import { SourceEditor } from "./components/SourceEditor";
 import { Toolbar } from "./components/Toolbar";
 import { ToolbarToggleButton } from "./components/ToolbarToggleButton";
+import { CommentsToggleButton } from "./components/CommentsToggleButton";
 import { FrontmatterEditor } from "./components/FrontmatterEditor";
 import { parseMarkdownToHtml } from "./utils/markdownParser";
 import { serializeHtmlToMarkdown } from "./utils/markdownSerializer";
@@ -73,6 +74,9 @@ export default function App() {
   const [lineHeightMultiplier, setLineHeightMultiplier] = useState<
     number | undefined
   >(undefined);
+  // Comments are hidden by default; adding one turns them on.
+  const [showComments, setShowComments] = useState(false);
+  const [commentCount, setCommentCount] = useState(0);
   const [frontmatter, setFrontmatter] = useState<string | null>(null);
   const [frontmatterExpanded, setFrontmatterExpanded] = useState(false);
   const frontmatterRef = useRef<string | null>(null);
@@ -90,6 +94,16 @@ export default function App() {
     setIsToolbarHidden((prev) => !prev);
   }, []);
 
+  // Toggle handler for comment visibility
+  const handleToggleComments = useCallback(() => {
+    setShowComments((prev) => !prev);
+  }, []);
+
+  // Adding a comment always reveals comments
+  const handleCommentAdded = useCallback(() => {
+    setShowComments(true);
+  }, []);
+
   // Toggle handler for frontmatter expanded/collapsed
   const handleToggleFrontmatter = useCallback(() => {
     setFrontmatterExpanded((prev) => !prev);
@@ -102,6 +116,9 @@ export default function App() {
     }
     if (settings.showCard !== undefined) {
       setShowCard(settings.showCard);
+    }
+    if (settings.showComments !== undefined) {
+      setShowComments(settings.showComments);
     }
     if (settings.contentPadding !== undefined) {
       setContentPadding(settings.contentPadding);
@@ -460,12 +477,22 @@ export default function App() {
           onToggleFrontmatter={handleToggleFrontmatter}
           viewMode={viewMode}
           onToggleViewMode={handleToggleViewMode}
+          showComments={showComments}
+          commentCount={commentCount}
+          onToggleComments={handleToggleComments}
         />
       )}
 
-      {/* Show toolbar button when hidden */}
+      {/* Show toolbar button (and comments toggle) when the toolbar is hidden */}
       {isToolbarHidden && (
-        <ToolbarToggleButton onToggle={handleToggleToolbar} />
+        <>
+          <ToolbarToggleButton onToggle={handleToggleToolbar} />
+          <CommentsToggleButton
+            active={showComments}
+            count={commentCount}
+            onToggle={handleToggleComments}
+          />
+        </>
       )}
 
       {/* Dark background area with document card */}
@@ -488,6 +515,9 @@ export default function App() {
             editor={editor}
             showCard={showCard}
             contentPadding={contentPadding}
+            showComments={showComments}
+            onCommentAdded={handleCommentAdded}
+            onCommentCountChange={setCommentCount}
           />
         ) : (
           <SourceEditor

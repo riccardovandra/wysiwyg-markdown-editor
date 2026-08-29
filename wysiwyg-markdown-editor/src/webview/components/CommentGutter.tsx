@@ -105,6 +105,12 @@ interface CommentGutterProps {
   editor: Editor | null;
   /** The positioned element the bubbles are laid out against (the card wrapper). */
   containerRef: RefObject<HTMLDivElement | null>;
+  /** When false, existing comments are hidden; the composer still works. */
+  visible?: boolean;
+  /** Called after a new comment is posted. */
+  onCommentAdded?: () => void;
+  /** Called whenever the number of comments changes. */
+  onCountChange?: (count: number) => void;
 }
 
 /**
@@ -112,7 +118,13 @@ interface CommentGutterProps {
  * composer, and one bubble per comment in the left margin. When the window is
  * too narrow for a margin, comments collapse to pins that open on click.
  */
-export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
+export function CommentGutter({
+  editor,
+  containerRef,
+  visible = true,
+  onCommentAdded,
+  onCountChange,
+}: CommentGutterProps) {
   const [items, setItems] = useState<CommentItem[]>([]);
   const [rawTops, setRawTops] = useState<Record<string, number>>({});
   const [tops, setTops] = useState<Record<string, number>>({});
@@ -125,6 +137,8 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
   const [flashId, setFlashId] = useState<string | null>(null);
   const bubbleRefs = useRef(new Map<string, HTMLDivElement>());
   const pendingDraftRef = useRef(false);
+  const visibleRef = useRef(visible);
+  visibleRef.current = visible;
 
   const refresh = useCallback(() => {
     if (!editor || editor.isDestroyed || !containerRef.current) return;
@@ -144,7 +158,8 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
     setItems(next);
     setRawTops(nextTops);
     const pane = containerRef.current.parentElement?.clientWidth ?? window.innerWidth;
-    const nextMode = pickLayoutMode(pane, next.length > 0 || pendingDraftRef.current);
+    const hasVisibleComments = (visibleRef.current && next.length > 0) || pendingDraftRef.current;
+    const nextMode = pickLayoutMode(pane, hasVisibleComments);
     setMode(nextMode);
     // The wrapper reserves the gutter through this variable (see .comment-layout in index.css).
     containerRef.current.style.setProperty('--comment-gutter', nextMode === 'reserved' ? `${BUBBLE_WIDTH + GAP}px` : '0px');
@@ -166,6 +181,15 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
       observer?.disconnect();
     };
   }, [editor, refresh, containerRef]);
+
+  // Visibility changes the layout mode (a hidden gutter reserves no space).
+  useEffect(() => {
+    refresh();
+  }, [visible, refresh]);
+
+  useEffect(() => {
+    onCountChange?.(items.length);
+  }, [items.length, onCountChange]);
 
   // Track the selection to show the floating button.
   useEffect(() => {
@@ -208,7 +232,7 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
 
   // Second pass: push bubbles down so they never overlap.
   useLayoutEffect(() => {
-    const entries = [...items.map((i) => i.id), ...(draft ? ['draft'] : [])]
+    const entries = [...(visible ? items.map((i) => i.id) : []), ...(draft ? ['draft'] : [])]
       .map((id) => ({ id, top: rawTops[id] ?? 0 }))
       .sort((a, b) => a.top - b.top);
     const next: Record<string, number> = {};
@@ -221,7 +245,7 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
     });
     const changed = Object.keys(next).some((k) => next[k] !== tops[k]) || Object.keys(next).length !== Object.keys(tops).length;
     if (changed) setTops(next);
-  }, [items, rawTops, draft, compact, tops]);
+  }, [items, rawTops, draft, compact, tops, visible]);
 
   // Highlight the text of the hovered bubble.
   useEffect(() => {
@@ -286,8 +310,9 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
       }
       setDraft(null);
       pendingDraftRef.current = false;
+      onCommentAdded?.();
     },
-    [editor, draft],
+    [editor, draft, onCommentAdded],
   );
 
   const resolve = useCallback(
@@ -339,7 +364,7 @@ export function CommentGutter({ editor, containerRef }: CommentGutterProps) {
           />
         )}
 
-        {items.map((item) => {
+        {visible && items.map((item) => {
           const top = tops[item.id] ?? rawTops[item.id] ?? 0;
           const isOpen = !compact || openId === item.id;
           return (

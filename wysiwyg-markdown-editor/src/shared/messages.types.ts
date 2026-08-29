@@ -13,6 +13,7 @@ export type WebViewMessage =
 export interface EditorSettings {
   hideToolbar?: boolean;
   showCard?: boolean;
+  showComments?: boolean;
   contentPadding?: 'compact' | 'medium' | 'spacious';
   textSize?: 'small' | 'medium' | 'large';
   lineHeight?: 'tight' | 'compact' | 'normal' | 'relaxed';

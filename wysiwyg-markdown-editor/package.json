@@ -193,6 +193,11 @@
           "type": "boolean",
           "default": true,
           "description": "Log resolved comments to a sibling <name>.comments.md file. Comments are stored inline as CriticMarkup ({==text==}{>>note<<}); when one is removed, by you or by an agent, its text and notes are appended to the history file."
+        },
+        "markdownWysiwyg.showComments": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show comment highlights and margin bubbles when a document opens. Adding a comment always shows them; use the toolbar toggle to hide or show them at any time."
         }
       }
     }

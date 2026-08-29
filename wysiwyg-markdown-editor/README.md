@@ -272,6 +272,8 @@ The report {==shows a 12% increase==}{>>double-check this number<<} over last qu
 
 A thread is a run of notes: `{==text==}{>>note<<}{>>Claude: reply<<}`. A note without a highlight (`{>>note<<}`) refers to the paragraph or block it sits in.
 
+Comments are hidden by default: the toolbar's comment button (also floating at the top right when the toolbar is hidden) toggles highlights and bubbles, with a badge showing how many comments the document has. Adding a comment turns them on. Set `markdownWysiwyg.showComments` to show them on open.
+
 **Resolve** deletes the comment from the file; the text stays. Every resolved comment (whether removed in the editor or by an agent editing the file) is appended to `<name>.comments.md` next to the document. Turn this off with `markdownWysiwyg.commentHistory`.
 
 ### Working with an AI agent

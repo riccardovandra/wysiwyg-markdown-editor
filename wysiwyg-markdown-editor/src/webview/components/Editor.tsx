@@ -8,6 +8,12 @@ interface EditorProps {
   editor: TipTapEditor | null;
   showCard?: boolean;
   contentPadding?: EditorSettings['contentPadding'];
+  /** Whether comment highlights and bubbles are shown */
+  showComments?: boolean;
+  /** Called when the user posts a new comment */
+  onCommentAdded?: () => void;
+  /** Called whenever the number of comments in the document changes */
+  onCommentCountChange?: (count: number) => void;
 }
 
 // Padding presets for different content padding options
@@ -30,7 +36,14 @@ const paddingClasses = {
  * - Configurable card display and padding
  * - Margin comments (CommentGutter) positioned against the card
  */
-export function Editor({ editor, showCard = true, contentPadding = 'medium' }: EditorProps) {
+export function Editor({
+  editor,
+  showCard = true,
+  contentPadding = 'medium',
+  showComments = true,
+  onCommentAdded,
+  onCommentCountChange,
+}: EditorProps) {
   const padding = paddingClasses[contentPadding];
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -42,7 +55,10 @@ export function Editor({ editor, showCard = true, contentPadding = 'medium' }: E
   return (
     <div className="min-h-full">
       {/* The wrapper is the positioning context for comment bubbles and the floating button */}
-      <div ref={containerRef} className="comment-layout relative mx-auto">
+      <div
+        ref={containerRef}
+        className={`comment-layout relative mx-auto${showComments ? '' : ' comments-hidden'}`}
+      >
         <div className={cardClasses}>
           <div className={padding}>
             <EditorContent
@@ -51,7 +67,13 @@ export function Editor({ editor, showCard = true, contentPadding = 'medium' }: E
             />
           </div>
         </div>
-        <CommentGutter editor={editor} containerRef={containerRef} />
+        <CommentGutter
+          editor={editor}
+          containerRef={containerRef}
+          visible={showComments}
+          onCommentAdded={onCommentAdded}
+          onCountChange={onCommentCountChange}
+        />
       </div>
     </div>
   );
