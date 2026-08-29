@@ -114,6 +114,46 @@ Second paragraph.`;
     });
   });
 
+  describe('Story 13.1: Image src rewriting', () => {
+    const baseUri = 'https://vscode-webview://abc/workspace/docs';
+
+    it('rewrites relative image paths to webview-prefixed URI', () => {
+      const html = parseMarkdownToHtml('![diagram](./images/flow.png)', baseUri);
+      expect(html).toContain(`src="${baseUri}/images/flow.png"`);
+      expect(html).toContain('alt="diagram"');
+    });
+
+    it('leaves remote URLs unchanged', () => {
+      const html = parseMarkdownToHtml(
+        '![](https://example.com/foo.png)',
+        baseUri
+      );
+      expect(html).toContain('src="https://example.com/foo.png"');
+      expect(html).not.toContain('vscode-webview');
+    });
+
+    it('leaves data URIs unchanged', () => {
+      const html = parseMarkdownToHtml(
+        '![](data:image/png;base64,iVBORw0KGgo)',
+        baseUri
+      );
+      expect(html).toContain('src="data:image/png;base64,iVBORw0KGgo"');
+    });
+
+    it('does not rewrite when baseUri is omitted', () => {
+      const html = parseMarkdownToHtml('![](./images/flow.png)');
+      expect(html).toContain('src="./images/flow.png"');
+    });
+
+    it('rewrites multiple images in a single document', () => {
+      const md =
+        '![first](./a.png)\n\n![second](./b.png)';
+      const html = parseMarkdownToHtml(md, baseUri);
+      expect(html).toContain(`src="${baseUri}/a.png"`);
+      expect(html).toContain(`src="${baseUri}/b.png"`);
+    });
+  });
+
   describe('performance', () => {
     it('should parse 10,000 lines in under 500ms (AC10)', () => {
       // Generate a large markdown file with 10,000 lines

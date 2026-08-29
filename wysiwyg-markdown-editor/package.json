@@ -28,6 +28,11 @@
         "command": "markdownWysiwyg.openTextEditor",
         "title": "Open Original",
         "category": "Markdown WYSIWYG"
+      },
+      {
+        "command": "markdownWysiwyg.copyAgentInstructions",
+        "title": "Copy Agent Instructions for Comments",
+        "category": "Markdown WYSIWYG"
       }
     ],
     "menus": {
@@ -58,6 +63,9 @@
         {
           "command": "markdownWysiwyg.openTextEditor",
           "when": "resourceExtname == .md && activeCustomEditorId == markdownWysiwyg.editor"
+        },
+        {
+          "command": "markdownWysiwyg.copyAgentInstructions"
         }
       ]
     },
@@ -180,6 +188,11 @@
           "minimum": 1,
           "maximum": 2.5,
           "description": "Line height multiplier for paragraph text."
+        },
+        "markdownWysiwyg.commentHistory": {
+          "type": "boolean",
+          "default": true,
+          "description": "Log resolved comments to a sibling <name>.comments.md file. Comments are stored inline as CriticMarkup ({==text==}{>>note<<}); when one is removed, by you or by an agent, its text and notes are appended to the history file."
         }
       }
     }
@@ -231,6 +244,7 @@
   },
   "dependencies": {
     "@tiptap/extension-code-block-lowlight": "^3.13.0",
+    "@tiptap/extension-image": "^3.22.5",
     "@tiptap/extension-link": "^3.13.0",
     "@tiptap/extension-placeholder": "^3.13.0",
     "@tiptap/extension-table": "^3.14.0",

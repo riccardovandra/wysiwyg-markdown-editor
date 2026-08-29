@@ -1,4 +1,6 @@
 import { marked } from 'marked';
+import { resolveImageSrc } from './imagePathResolver';
+import { criticMarkupToHtml } from '../../shared/criticMarkup';
 
 /**
  * Transforms GFM task list HTML to TipTap-compatible format.
@@ -91,12 +93,32 @@ function transformTableCellCheckboxes(html: string): string {
 }
 
 /**
+ * Rewrites <img src="..."> attributes through resolveImageSrc so that
+ * relative paths become webview-safe URIs while passthrough URLs
+ * (http(s)/data/file/blob) are left untouched (Story 13.1).
+ */
+function rewriteImageSources(html: string, baseUri: string): string {
+  if (!baseUri) {
+    return html;
+  }
+  return html.replace(
+    /<img\b([^>]*?)\ssrc="([^"]*)"([^>]*)>/gi,
+    (_match, before, src, after) => {
+      const resolved = resolveImageSrc(src, baseUri);
+      return `<img${before} src="${resolved}"${after}>`;
+    }
+  );
+}
+
+/**
  * Parses markdown text and converts it to HTML for TipTap consumption.
  *
  * Uses the 'marked' library to convert markdown syntax to HTML elements
  * that TipTap's StarterKit can render natively.
  *
  * @param markdown - Raw markdown string to parse
+ * @param baseUri - Optional document base URI used to rewrite relative
+ *   image sources so the WebView can render them (Story 13.1)
  * @returns HTML string ready for TipTap editor
  *
  * @example
@@ -106,7 +128,7 @@ function transformTableCellCheckboxes(html: string): string {
  * editor.commands.setContent(html);
  * ```
  */
-export function parseMarkdownToHtml(markdown: string): string {
+export function parseMarkdownToHtml(markdown: string, baseUri?: string): string {
   if (!markdown) {
     return '';
   }
@@ -121,8 +143,12 @@ export function parseMarkdownToHtml(markdown: string): string {
     breaks: false,
   });
 
+  // Rewrite CriticMarkup comments ({==text==}{>>note<<}) into <mark>/<span> tags
+  // BEFORE marked runs, so inline formatting inside a highlight is still parsed.
+  const withComments = criticMarkupToHtml(markdown);
+
   // Parse markdown to HTML synchronously
-  let html = marked.parse(markdown, { async: false }) as string;
+  let html = marked.parse(withComments, { async: false }) as string;
 
   // Transform task list HTML to TipTap-compatible format
   html = transformTaskListHtml(html);
@@ -132,6 +158,11 @@ export function parseMarkdownToHtml(markdown: string): string {
 
   // Transform checkbox syntax in table cells to inline checkboxes
   html = transformTableCellCheckboxes(html);
+
+  // Rewrite relative <img src> values to webview-safe URIs (Story 13.1).
+  if (baseUri) {
+    html = rewriteImageSources(html, baseUri);
+  }
 
   return html.trim();
 }

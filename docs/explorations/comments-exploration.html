@@ -1,0 +1,859 @@
+<title>Margin Comments</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #f3f3f8;
+    --card: #ffffff;
+    --surface: #ebebf3;
+    --hover: #e2e2ec;
+    --text: #1b1b26;
+    --text-2: #585870;
+    --muted: #8b8ba3;
+    --heading: #111118;
+    --accent: #5457d6;
+    --accent-ink: #ffffff;
+    --accent-soft: rgba(84, 87, 214, 0.12);
+    --line: rgba(24, 24, 48, 0.12);
+    --line-strong: rgba(24, 24, 48, 0.22);
+    --hl: rgba(245, 158, 11, 0.3);
+    --hl-strong: rgba(245, 158, 11, 0.55);
+    --hl-line: #d97706;
+    --hl-ink: #92400e;
+    --shadow: 0 18px 40px rgba(20, 20, 50, 0.12);
+    --shadow-sm: 0 2px 10px rgba(20, 20, 50, 0.08);
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f0f14;
+      --card: #16161d;
+      --surface: #1e1e28;
+      --hover: #252532;
+      --text: #e4e4e7;
+      --text-2: #a1a1aa;
+      --muted: #71717a;
+      --heading: #ffffff;
+      --accent: #818cf8;
+      --accent-ink: #0f0f14;
+      --accent-soft: rgba(129, 140, 248, 0.12);
+      --line: rgba(255, 255, 255, 0.1);
+      --line-strong: rgba(255, 255, 255, 0.2);
+      --hl: rgba(251, 191, 36, 0.26);
+      --hl-strong: rgba(251, 191, 36, 0.5);
+      --hl-line: #f59e0b;
+      --hl-ink: #fcd34d;
+      --shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+      --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.35);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f0f14;
+    --card: #16161d;
+    --surface: #1e1e28;
+    --hover: #252532;
+    --text: #e4e4e7;
+    --text-2: #a1a1aa;
+    --muted: #71717a;
+    --heading: #ffffff;
+    --accent: #818cf8;
+    --accent-ink: #0f0f14;
+    --accent-soft: rgba(129, 140, 248, 0.12);
+    --line: rgba(255, 255, 255, 0.1);
+    --line-strong: rgba(255, 255, 255, 0.2);
+    --hl: rgba(251, 191, 36, 0.26);
+    --hl-strong: rgba(251, 191, 36, 0.5);
+    --hl-line: #f59e0b;
+    --hl-ink: #fcd34d;
+    --shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.35);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  button { font: inherit; color: inherit; }
+  button:focus-visible, textarea:focus-visible, [contenteditable]:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .page { max-width: 1240px; margin: 0 auto; padding: 40px 24px 96px; }
+
+  /* ---------- Intro ---------- */
+  .intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 24px 40px;
+    align-items: end;
+    margin-bottom: 28px;
+  }
+  .eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .title {
+    font-size: 34px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--heading);
+    margin: 8px 0 10px;
+    text-wrap: balance;
+  }
+  .brief { margin: 0; color: var(--text-2); max-width: 62ch; }
+  .steps { display: flex; gap: 8px; flex-wrap: wrap; }
+  .step {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 12px 7px 8px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 12.5px;
+    color: var(--text-2);
+    background: var(--card);
+  }
+  .step i {
+    font-style: normal;
+    width: 18px; height: 18px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 11px; font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .step b { color: var(--text); font-weight: 600; }
+
+  /* ---------- Stage: gutter + document card ---------- */
+  .stage {
+    display: grid;
+    grid-template-columns: 280px minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .bubbles { position: relative; align-self: stretch; min-height: 100%; }
+  .card {
+    position: relative;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    padding: 52px 72px 60px;
+  }
+  .doc { outline: none; font-size: 16px; line-height: 1.75; max-width: 66ch; caret-color: var(--text); }
+  .doc h1 { font-size: 30px; line-height: 1.15; letter-spacing: -0.02em; color: var(--accent); margin: 0 0 0.5em; text-wrap: balance; }
+  .doc h2 { font-size: 20px; color: var(--accent); margin: 1.4em 0 0.4em; }
+  .doc p { margin: 0.9em 0; }
+  .doc ul { padding-left: 1.4em; margin: 0.6em 0; }
+  .doc li { margin: 0.3em 0; }
+  .doc strong { color: var(--accent); font-weight: 600; }
+  .doc em { color: var(--accent); }
+  .doc code {
+    font-family: var(--mono);
+    font-size: 0.85em;
+    background: var(--accent-soft);
+    color: var(--accent);
+    padding: 0.12em 0.4em;
+    border-radius: 6px;
+  }
+  .doc ::selection { background: var(--accent-soft); }
+
+  /* Comment highlight in the text */
+  mark.c-hl {
+    background: var(--hl);
+    color: inherit;
+    border-bottom: 2px solid var(--hl-line);
+    padding: 0.1em 0;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  mark.c-hl.first { border-top-left-radius: 3px; border-bottom-left-radius: 3px; }
+  mark.c-hl.last { border-top-right-radius: 3px; border-bottom-right-radius: 3px; }
+  mark.c-hl.active, mark.c-hl.pending { background: var(--hl-strong); }
+  mark.c-hl.resolved { background: transparent; border-bottom: 1px dotted var(--hl-line); }
+  mark.c-hl.resolved.active { background: var(--hl); }
+
+  /* Floating "Comment" button above the selection */
+  .comment-btn {
+    position: absolute;
+    z-index: 5;
+    display: flex; align-items: center; gap: 7px;
+    padding: 7px 12px 7px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--card);
+    box-shadow: var(--shadow-sm);
+    font-size: 12.5px; font-weight: 600;
+    cursor: pointer;
+    transform: translate(-50%, calc(-100% - 10px));
+    white-space: nowrap;
+  }
+  .comment-btn[hidden] { display: none; }
+  .comment-btn:hover { background: var(--hover); }
+  .comment-btn svg { width: 15px; height: 15px; color: var(--hl-line); }
+
+  /* Margin bubbles (comments and the draft composer) */
+  .bubble {
+    position: absolute;
+    left: 0;
+    width: 280px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 12px 14px;
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    transition: top 0.2s ease, border-color 0.15s ease, opacity 0.2s ease;
+  }
+  .bubble::after {
+    content: "";
+    position: absolute;
+    top: 20px;
+    left: 100%;
+    width: 24px;
+    border-top: 1px dashed var(--line-strong);
+    pointer-events: none;
+  }
+  .bubble.active { border-color: var(--hl-line); }
+  .bubble.active::after { border-top-style: solid; border-top-color: var(--hl-line); }
+  .bubble.flash { animation: flash 0.9s ease; }
+  @keyframes flash { 0%, 60% { box-shadow: 0 0 0 3px var(--hl); } 100% { box-shadow: var(--shadow-sm); } }
+  .bubble.resolved { opacity: 0.6; }
+  .bubble.resolved.active { opacity: 1; }
+  .who { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+  .avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: grid; place-items: center;
+    background: var(--accent); color: var(--accent-ink);
+    font-size: 10px; font-weight: 700; letter-spacing: 0.02em;
+    flex: none;
+  }
+  .name { font-size: 13px; font-weight: 600; }
+  .time { font-size: 12px; color: var(--muted); margin-left: auto; }
+  .chip {
+    font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--hl-ink); background: var(--hl); padding: 2px 7px; border-radius: 999px;
+  }
+  .quote {
+    margin: 0 0 7px;
+    padding-left: 8px;
+    border-left: 2px solid var(--hl-line);
+    font-size: 11.5px; color: var(--muted);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .body { font-size: 13.5px; line-height: 1.5; overflow-wrap: anywhere; }
+  .actions { display: flex; gap: 12px; margin-top: 9px; opacity: 0; transition: opacity 0.15s ease; }
+  .bubble:hover .actions, .bubble:focus-within .actions, .bubble.active .actions { opacity: 1; }
+  .actions button {
+    background: none; border: 0; padding: 0;
+    font-size: 12px; font-weight: 600; color: var(--text-2); cursor: pointer;
+  }
+  .actions button:hover { color: var(--accent); }
+  .actions button.danger:hover { color: #dc2626; }
+
+  /* Composer variant of the bubble */
+  .bubble.composer { cursor: default; border-color: var(--hl-line); }
+  .bubble.composer::after { border-top-style: solid; border-top-color: var(--hl-line); }
+  .composer textarea {
+    width: 100%;
+    min-height: 68px;
+    resize: vertical;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit; font-size: 13.5px; line-height: 1.5;
+    padding: 8px 10px;
+  }
+  .composer textarea::placeholder { color: var(--muted); }
+  .composer .row { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .composer .hint { font-size: 11px; color: var(--muted); margin-right: auto; }
+  .btn {
+    border: 1px solid var(--line-strong);
+    border-radius: 8px;
+    background: transparent;
+    padding: 5px 11px;
+    font-size: 12.5px; font-weight: 600;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--hover); }
+  .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+  .btn.primary:hover { filter: brightness(1.08); }
+  .btn.primary:disabled { opacity: 0.45; cursor: not-allowed; filter: none; }
+
+  .gutter-empty {
+    position: absolute; left: 0; top: 52px; width: 280px;
+    font-size: 12.5px; color: var(--muted);
+    padding: 12px 14px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+  }
+  .caption { margin: 14px 0 0; font-size: 12.5px; color: var(--muted); }
+
+  /* ---------- Storage panel ---------- */
+  .storage { margin-top: 56px; }
+  .storage-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 12px; }
+  .storage h2, .notes h2 { font-size: 18px; margin: 0; color: var(--heading); letter-spacing: -0.01em; }
+  .seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; margin-left: auto; }
+  .seg button {
+    border: 0; background: transparent; padding: 6px 12px;
+    font-size: 12.5px; font-weight: 600; color: var(--text-2); cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--line-strong); }
+  .seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+  pre.md {
+    margin: 0;
+    padding: 18px 20px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.65;
+    color: var(--text-2);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  pre.md .tok { color: var(--hl-ink); background: var(--hl); border-radius: 3px; }
+  pre.md .note { color: var(--text); font-weight: 500; }
+  .formats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin-top: 16px; }
+  .format {
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--card);
+    font-size: 13.5px;
+    color: var(--text-2);
+  }
+  .format h3 { margin: 0 0 6px; font-size: 14px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+  .format h3 .rec { font-size: 10.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); background: var(--accent-soft); padding: 2px 7px; border-radius: 999px; }
+  .format code { font-family: var(--mono); font-size: 12px; color: var(--text); }
+  .format p { margin: 0; }
+
+  .notes { margin-top: 48px; }
+  .notes ol { margin: 12px 0 0; padding-left: 22px; color: var(--text-2); font-size: 14px; }
+  .notes li { margin: 8px 0; padding-left: 4px; }
+  .notes li::marker { color: var(--muted); font-variant-numeric: tabular-nums; }
+  .notes code { font-family: var(--mono); font-size: 12px; color: var(--text); }
+
+  @media (max-width: 880px) {
+    .intro { grid-template-columns: 1fr; align-items: start; }
+    .stage { grid-template-columns: 1fr; }
+    .bubbles { order: 2; display: flex; flex-direction: column; gap: 10px; }
+    .bubble { position: static; width: auto; }
+    .bubble::after { display: none; }
+    .gutter-empty { position: static; width: auto; }
+    .card { padding: 36px 24px 40px; }
+    .formats { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .bubble, mark.c-hl, .actions { transition: none; }
+    .bubble.flash { animation: none; }
+  }
+</style>
+
+<div class="page">
+  <header class="intro">
+    <div>
+      <div class="eyebrow">Exploration · WYSIWYG Markdown Editor</div>
+      <h1 class="title">Comments that live in the margin</h1>
+      <p class="brief">Select text in the document below, press the button that appears, type a note. The comment lands in the left margin, anchored to its line, and the section at the bottom shows exactly what gets written to the <code>.md</code> file.</p>
+    </div>
+    <div class="steps" aria-label="How it works">
+      <span class="step"><i>1</i><b>Select</b> text</span>
+      <span class="step"><i>2</i><b>Comment</b> button appears</span>
+      <span class="step"><i>3</i>Bubble in the <b>margin</b></span>
+    </div>
+  </header>
+
+  <section class="stage" id="stage">
+    <div class="bubbles" id="bubbles"></div>
+    <div class="card" id="card">
+      <button class="comment-btn" id="commentBtn" hidden type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-8 8H8l-5 3 1.4-4.2A8 8 0 1 1 21 12z"/></svg>
+        Comment
+      </button>
+      <div class="doc" id="doc" contenteditable="true" spellcheck="false">
+        <h1>Comments in the WYSIWYG editor</h1>
+        <p>Select any run of text in this document. A <strong>Comment</strong> button appears above the selection; the note you type shows up in the left margin, anchored to the line it belongs to. Highlights stay in the text, so the comment survives scrolling, editing around it, and reopening the file.</p>
+        <h2>Why margin bubbles</h2>
+        <p>Inline notes compete with the prose, and a side panel loses the connection to the line. The left margin keeps both: the highlight marks <em>what</em>, the bubble says <em>why</em>, and a leader line ties them together. Reviewers used to Google Docs will not need instructions.</p>
+        <p>The file on disk stays plain markdown. Each comment is written as <code>{==highlighted text==}{>>note<<}</code>, the CriticMarkup convention, so a teammate reading the raw <code>.md</code> on GitHub still sees the note next to the passage it refers to.</p>
+        <h2>Behaviour to confirm</h2>
+        <ul>
+          <li>Resolving a comment removes it from the file; the text stays untouched.</li>
+          <li>Deleting a comment removes the highlight and the note.</li>
+          <li>A comment can span inline code, bold text, or several sentences.</li>
+          <li>Bubbles never overlap: when two comments sit on the same line, the second one is pushed down.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+  <p class="caption">The document is editable, like the real editor. Hover a bubble to see its highlight; click a highlight to jump to its bubble.</p>
+
+  <section class="storage">
+    <div class="storage-head">
+      <h2>What gets saved to the file</h2>
+      <div class="seg" role="group" aria-label="Storage format">
+        <button type="button" data-format="critic" aria-pressed="true">CriticMarkup</button>
+        <button type="button" data-format="html" aria-pressed="false">HTML mark</button>
+      </div>
+    </div>
+    <pre class="md" id="md" aria-live="polite"></pre>
+    <div class="formats">
+      <div class="format">
+        <h3>CriticMarkup <span class="rec">Recommended</span></h3>
+        <p><code>{==text==}{>>note<<}</code>. Plain text, readable in any diff, already understood by iA Writer, Marked 2 and Pandoc filters. GitHub shows the braces literally, which is noisy but keeps the note next to the passage. Resolving a comment strips both parts from the file.</p>
+      </div>
+      <div class="format">
+        <h3>HTML <code>&lt;mark&gt;</code></h3>
+        <p><code>&lt;mark data-comment="note"&gt;text&lt;/mark&gt;</code>. Renders as a real highlight on GitHub, but the note hides in an attribute nobody reads, and both <code>marked</code> and <code>turndown</code> need HTML passthrough rules. Better only if GitHub rendering matters more than the note itself.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="notes">
+    <h2>How this maps onto the extension</h2>
+    <ol>
+      <li>A TipTap <code>Mark</code> named <code>comment</code> with an <code>id</code> attribute, rendered as <code>&lt;mark data-comment-id&gt;</code>. The toolbar-free flow above is <code>editor.commands.setMark('comment', { id })</code> on the current selection.</li>
+      <li>Comment bodies live outside the document: a map <code>id → { text, author, createdAt, resolved }</code> in React state. The gutter component positions each bubble with <code>editor.view.coordsAtPos(from)</code> after every transaction and on resize, then pushes overlapping bubbles down, exactly as this page does.</li>
+      <li>Save: a <code>turndown</code> rule for <code>mark[data-comment-id]</code> emits <code>{==…==}{>>…<<}</code>. Load: a regex pre-pass in <code>markdownParser.ts</code> turns CriticMarkup back into <code>&lt;mark&gt;</code> before <code>marked</code> runs, so the round trip is lossless.</li>
+      <li>Resolve removes the mark and the note from the file. CriticMarkup has no resolved state; if history matters, resolved notes could be kept in frontmatter. That is the one design decision left open.</li>
+      <li>Rough size: one day. Half for the mark plus gutter, half for the serializer and parser round trip with tests.</li>
+    </ol>
+  </section>
+</div>
+
+<script>
+(function () {
+  var doc = document.getElementById('doc');
+  var card = document.getElementById('card');
+  var bubblesEl = document.getElementById('bubbles');
+  var btn = document.getElementById('commentBtn');
+  var mdEl = document.getElementById('md');
+  var AUTHOR = { name: 'Riccardo', initials: 'RV' };
+  var comments = [];          // { id, text, createdAt, resolved }
+  var pendingRange = null;    // selection captured before the composer opens
+  var draft = null;           // { id, el } while the composer is open
+  var format = 'critic';
+  var uid = 0;
+
+  function nextId() { uid += 1; return 'c' + uid; }
+  function marksOf(id) { return Array.prototype.slice.call(doc.querySelectorAll('mark[data-id="' + id + '"]')); }
+  function isNarrow() { return window.innerWidth <= 880; }
+
+  /* ---------- Range helpers ---------- */
+  var INLINE = { CODE: 1, STRONG: 1, EM: 1, B: 1, I: 1, A: 1, SPAN: 1 };
+
+  // Split the boundary text nodes so the range covers whole text nodes only.
+  // Element-boundary endpoints (e.g. "after the <code>") are pinned to their
+  // neighbouring node first, because splitting a text node shifts child indexes.
+  function normalizeRange(range) {
+    var r = document.createRange();
+    var sc = range.startContainer, so = range.startOffset;
+    var ec = range.endContainer, eo = range.endOffset;
+    var startBefore = null, endAfter = null;
+    if (sc.nodeType !== 3) startBefore = so < sc.childNodes.length ? sc.childNodes[so] : null;
+    if (ec.nodeType !== 3) endAfter = eo > 0 ? ec.childNodes[eo - 1] : null;
+    if (ec.nodeType === 3 && eo < ec.length) ec.splitText(eo);
+    if (sc.nodeType === 3 && so > 0) {
+      var rest = sc.splitText(so);
+      if (sc === ec) ec = rest;
+      sc = rest;
+    }
+    if (sc.nodeType === 3) r.setStart(sc, 0);
+    else if (startBefore) r.setStartBefore(startBefore);
+    else r.setStart(sc, sc.childNodes.length);
+    if (ec.nodeType === 3) r.setEnd(ec, ec.length);
+    else if (endAfter) r.setEndAfter(endAfter);
+    else r.setEnd(ec, 0);
+    return r;
+  }
+
+  var BLOCK_CONTAINER = { UL: 1, OL: 1, DIV: 1 };
+
+  function textInside(range, n) {
+    return range.isPointInRange(n, 0) && range.isPointInRange(n, n.length);
+  }
+
+  // An inline element can be wrapped whole when every text node it holds is selected.
+  function allTextInside(el, inside) {
+    var w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT), n;
+    while ((n = w.nextNode())) {
+      if (n.data.length && inside.indexOf(n) === -1) return false;
+    }
+    return true;
+  }
+
+  // Wrap every text run inside the range in <mark data-id>. Inline elements that
+  // sit entirely inside the range are wrapped whole so `code`/`strong` stay intact.
+  function wrapRange(range, id, pending) {
+    var r = normalizeRange(range);
+    var walker = document.createTreeWalker(doc, NodeFilter.SHOW_TEXT);
+    var inside = [], targets = [], n;
+    while ((n = walker.nextNode())) {
+      if (!n.data.length || !r.intersectsNode(n) || !textInside(r, n)) continue;
+      // Whitespace between blocks (e.g. between <li>s) is layout, not content.
+      if (!n.data.trim() && BLOCK_CONTAINER[n.parentNode.nodeName]) continue;
+      inside.push(n);
+    }
+    inside.forEach(function (t) {
+      while (t.parentNode && INLINE[t.parentNode.nodeName] && allTextInside(t.parentNode, inside)) t = t.parentNode;
+      if (targets.indexOf(t) === -1) targets.push(t);
+    });
+    targets.forEach(function (t, i) {
+      var m = document.createElement('mark');
+      m.className = 'c-hl' + (i === 0 ? ' first' : '') + (i === targets.length - 1 ? ' last' : '') + (pending ? ' pending' : '');
+      m.setAttribute('data-id', id);
+      t.parentNode.insertBefore(m, t);
+      m.appendChild(t);
+    });
+    return targets.length > 0;
+  }
+
+  function unwrap(id) {
+    marksOf(id).forEach(function (m) {
+      var parent = m.parentNode;
+      while (m.firstChild) parent.insertBefore(m.firstChild, m);
+      parent.removeChild(m);
+    });
+    doc.normalize();
+  }
+
+  function findRange(text) {
+    var walker = document.createTreeWalker(doc, NodeFilter.SHOW_TEXT), n;
+    while ((n = walker.nextNode())) {
+      var i = n.data.indexOf(text);
+      if (i !== -1) {
+        var r = document.createRange();
+        r.setStart(n, i);
+        r.setEnd(n, i + text.length);
+        return r;
+      }
+    }
+    return null;
+  }
+
+  function selectionInDoc() {
+    var sel = window.getSelection();
+    if (!sel || sel.rangeCount === 0 || sel.isCollapsed) return null;
+    var r = sel.getRangeAt(0);
+    if (!doc.contains(r.startContainer) || !doc.contains(r.endContainer)) return null;
+    if (!r.toString().trim()) return null;
+    var a = r.startContainer.nodeType === 3 ? r.startContainer.parentNode : r.startContainer;
+    var b = r.endContainer.nodeType === 3 ? r.endContainer.parentNode : r.endContainer;
+    if (a.closest('mark.c-hl') || b.closest('mark.c-hl')) return null;
+    return r;
+  }
+
+  /* ---------- Floating button ---------- */
+  function showButton(range) {
+    var rect = range.getBoundingClientRect();
+    var rects = range.getClientRects();
+    var first = rects.length ? rects[0] : rect;
+    var c = card.getBoundingClientRect();
+    btn.style.left = (first.left + first.width / 2 - c.left) + 'px';
+    btn.style.top = (first.top - c.top) + 'px';
+    btn.hidden = false;
+  }
+  function hideButton() { btn.hidden = true; }
+
+  var selTimer;
+  document.addEventListener('selectionchange', function () {
+    clearTimeout(selTimer);
+    selTimer = setTimeout(function () {
+      if (draft) return;
+      var r = selectionInDoc();
+      if (r) { pendingRange = r.cloneRange(); showButton(r); } else { hideButton(); }
+    }, 120);
+  });
+  btn.addEventListener('mousedown', function (e) { e.preventDefault(); });
+  btn.addEventListener('click', function () { if (pendingRange) openComposer(pendingRange); });
+
+  /* ---------- Composer ---------- */
+  function openComposer(range) {
+    cancelDraft();
+    var id = nextId();
+    if (!wrapRange(range, id, true)) return;
+    window.getSelection().removeAllRanges();
+    hideButton();
+
+    var el = document.createElement('div');
+    el.className = 'bubble composer';
+    el.setAttribute('data-id', id);
+    el.innerHTML =
+      '<div class="who"><span class="avatar"></span><span class="name"></span><span class="time">draft</span></div>' +
+      '<p class="quote"></p>' +
+      '<textarea placeholder="Write a comment" rows="3" aria-label="Comment text"></textarea>' +
+      '<div class="row"><span class="hint">⌘↩ to post · Esc to cancel</span>' +
+      '<button type="button" class="btn cancel">Cancel</button>' +
+      '<button type="button" class="btn primary post" disabled>Comment</button></div>';
+    el.querySelector('.avatar').textContent = AUTHOR.initials;
+    el.querySelector('.name').textContent = AUTHOR.name;
+    el.querySelector('.quote').textContent = quoteFor(id);
+    var ta = el.querySelector('textarea');
+    var post = el.querySelector('.post');
+    ta.addEventListener('input', function () { post.disabled = !ta.value.trim(); });
+    ta.addEventListener('keydown', function (e) {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); submitDraft(); }
+      if (e.key === 'Escape') { e.preventDefault(); cancelDraft(); }
+    });
+    post.addEventListener('click', submitDraft);
+    el.querySelector('.cancel').addEventListener('click', cancelDraft);
+    bubblesEl.appendChild(el);
+    draft = { id: id, el: el };
+    layout();
+    ta.focus();
+  }
+
+  function submitDraft() {
+    if (!draft) return;
+    var text = draft.el.querySelector('textarea').value.trim();
+    if (!text) return;
+    comments.push({ id: draft.id, text: text, createdAt: Date.now(), resolved: false });
+    marksOf(draft.id).forEach(function (m) { m.classList.remove('pending'); });
+    draft.el.remove();
+    draft = null;
+    render();
+  }
+
+  function cancelDraft() {
+    if (!draft) return;
+    unwrap(draft.id);
+    draft.el.remove();
+    draft = null;
+    render();
+  }
+
+  /* ---------- Bubbles ---------- */
+  function quoteFor(id) {
+    return marksOf(id).map(function (m) { return m.textContent; }).join('');
+  }
+
+  function timeAgo(ts) {
+    var s = Math.round((Date.now() - ts) / 1000);
+    if (s < 45) return 'just now';
+    var m = Math.round(s / 60);
+    if (m < 60) return m + ' min ago';
+    var h = Math.round(m / 60);
+    return h + ' h ago';
+  }
+
+  function setActive(id, on) {
+    marksOf(id).forEach(function (m) { m.classList.toggle('active', on); });
+    var b = bubblesEl.querySelector('.bubble[data-id="' + id + '"]');
+    if (b) b.classList.toggle('active', on);
+  }
+
+  function bubbleFor(c) {
+    var el = document.createElement('div');
+    el.className = 'bubble' + (c.resolved ? ' resolved' : '');
+    el.setAttribute('data-id', c.id);
+    el.tabIndex = 0;
+    el.innerHTML =
+      '<div class="who"><span class="avatar"></span><span class="name"></span>' +
+      (c.resolved ? '<span class="chip">Resolved</span>' : '') +
+      '<span class="time"></span></div>' +
+      '<p class="quote"></p><div class="body"></div>' +
+      '<div class="actions"><button type="button" class="resolve"></button><button type="button" class="danger delete">Delete</button></div>';
+    el.querySelector('.avatar').textContent = AUTHOR.initials;
+    el.querySelector('.name').textContent = AUTHOR.name;
+    el.querySelector('.time').textContent = timeAgo(c.createdAt);
+    el.querySelector('.quote').textContent = quoteFor(c.id);
+    el.querySelector('.body').textContent = c.text;
+    el.querySelector('.resolve').textContent = c.resolved ? 'Reopen' : 'Resolve';
+    el.addEventListener('mouseenter', function () { setActive(c.id, true); });
+    el.addEventListener('mouseleave', function () { setActive(c.id, false); });
+    el.addEventListener('focus', function () { setActive(c.id, true); });
+    el.addEventListener('blur', function () { setActive(c.id, false); });
+    el.querySelector('.resolve').addEventListener('click', function (e) {
+      e.stopPropagation();
+      c.resolved = !c.resolved;
+      marksOf(c.id).forEach(function (m) { m.classList.toggle('resolved', c.resolved); });
+      render();
+    });
+    el.querySelector('.delete').addEventListener('click', function (e) {
+      e.stopPropagation();
+      unwrap(c.id);
+      comments = comments.filter(function (x) { return x.id !== c.id; });
+      render();
+    });
+    return el;
+  }
+
+  function render() {
+    Array.prototype.slice.call(bubblesEl.querySelectorAll('.bubble:not(.composer), .gutter-empty')).forEach(function (n) { n.remove(); });
+    if (!comments.length && !draft) {
+      var empty = document.createElement('div');
+      empty.className = 'gutter-empty';
+      empty.textContent = 'No comments yet. Select some text in the document to add one.';
+      bubblesEl.appendChild(empty);
+    }
+    comments.forEach(function (c) { bubblesEl.appendChild(bubbleFor(c)); });
+    layout();
+    renderMarkdown();
+  }
+
+  // Anchor each bubble to the top of its highlight, then push overlapping ones down.
+  function layout() {
+    var items = Array.prototype.slice.call(bubblesEl.querySelectorAll('.bubble'));
+    if (isNarrow()) {
+      items.forEach(function (el) { el.style.top = ''; });
+      bubblesEl.style.minHeight = '';
+      return;
+    }
+    var base = bubblesEl.getBoundingClientRect().top;
+    var placed = items.map(function (el) {
+      var first = marksOf(el.getAttribute('data-id'))[0];
+      var top = first ? first.getBoundingClientRect().top - base - 6 : 0;
+      return { el: el, top: Math.max(0, top) };
+    }).sort(function (a, b) { return a.top - b.top; });
+    var y = -Infinity;
+    placed.forEach(function (p) {
+      var top = Math.max(p.top, y);
+      p.el.style.top = top + 'px';
+      y = top + p.el.offsetHeight + 10;
+    });
+    bubblesEl.style.minHeight = (y > 0 ? y : 0) + 'px';
+  }
+
+  /* ---------- Highlight interactions in the text ---------- */
+  doc.addEventListener('mouseover', function (e) {
+    var m = e.target.closest && e.target.closest('mark.c-hl');
+    if (m) setActive(m.getAttribute('data-id'), true);
+  });
+  doc.addEventListener('mouseout', function (e) {
+    var m = e.target.closest && e.target.closest('mark.c-hl');
+    if (m) setActive(m.getAttribute('data-id'), false);
+  });
+  doc.addEventListener('click', function (e) {
+    var m = e.target.closest && e.target.closest('mark.c-hl');
+    if (!m) return;
+    var b = bubblesEl.querySelector('.bubble[data-id="' + m.getAttribute('data-id') + '"]');
+    if (!b) return;
+    b.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    b.classList.remove('flash');
+    void b.offsetWidth;
+    b.classList.add('flash');
+  });
+  doc.addEventListener('input', function () { layout(); renderMarkdown(); });
+
+  /* ---------- Markdown output ---------- */
+  function commentById(id) {
+    for (var i = 0; i < comments.length; i++) if (comments[i].id === id) return comments[i];
+    return null;
+  }
+
+  // Serialize inline content into [{ text, cls }] chunks; `annotated` tracks which
+  // comment ids already carry their note so multi-run highlights get it once.
+  function inline(node, out, annotated) {
+    var kids = Array.prototype.slice.call(node.childNodes);
+    for (var i = 0; i < kids.length; i++) {
+      var k = kids[i];
+      if (k.nodeType === 3) { out.push({ text: k.data }); continue; }
+      if (k.nodeType !== 1) continue;
+      var tag = k.nodeName;
+      if (tag === 'MARK') {
+        var id = k.getAttribute('data-id');
+        var c = commentById(id);
+        if (!c || c.resolved) { inline(k, out, annotated); continue; }
+        // Merge consecutive marks of the same comment into one run.
+        var run = [k];
+        while (kids[i + 1] && kids[i + 1].nodeType === 1 && kids[i + 1].nodeName === 'MARK' && kids[i + 1].getAttribute('data-id') === id) { i += 1; run.push(kids[i]); }
+        var last = marksOf(id).slice(-1)[0];
+        var carriesNote = run.indexOf(last) !== -1 && !annotated[id];
+        if (format === 'critic') {
+          out.push({ text: '{==', cls: 'tok' });
+          run.forEach(function (m) { inline(m, out, annotated); });
+          out.push({ text: '==}', cls: 'tok' });
+          if (carriesNote) { out.push({ text: '{>>', cls: 'tok' }); out.push({ text: c.text, cls: 'note' }); out.push({ text: '<<}', cls: 'tok' }); annotated[id] = true; }
+        } else {
+          var attr = carriesNote ? ' data-comment="' + c.text.replace(/"/g, '&quot;') + '"' : '';
+          if (carriesNote) annotated[id] = true;
+          out.push({ text: '<mark data-comment-id="' + id + '"' + attr + '>', cls: 'tok' });
+          run.forEach(function (m) { inline(m, out, annotated); });
+          out.push({ text: '</mark>', cls: 'tok' });
+        }
+        continue;
+      }
+      if (tag === 'CODE') { out.push({ text: '`' }); inline(k, out, annotated); out.push({ text: '`' }); }
+      else if (tag === 'STRONG' || tag === 'B') { out.push({ text: '**' }); inline(k, out, annotated); out.push({ text: '**' }); }
+      else if (tag === 'EM' || tag === 'I') { out.push({ text: '*' }); inline(k, out, annotated); out.push({ text: '*' }); }
+      else if (tag === 'BR') { out.push({ text: '\n' }); }
+      else { inline(k, out, annotated); }
+    }
+  }
+
+  function renderMarkdown() {
+    var out = [], annotated = {};
+    var blocks = Array.prototype.slice.call(doc.children);
+    blocks.forEach(function (b, idx) {
+      var tag = b.nodeName;
+      if (tag === 'H1') { out.push({ text: '# ' }); inline(b, out, annotated); }
+      else if (tag === 'H2') { out.push({ text: '## ' }); inline(b, out, annotated); }
+      else if (tag === 'UL' || tag === 'OL') {
+        Array.prototype.slice.call(b.children).forEach(function (li, j) {
+          out.push({ text: (tag === 'UL' ? '- ' : (j + 1) + '. ') });
+          inline(li, out, annotated);
+          if (j < b.children.length - 1) out.push({ text: '\n' });
+        });
+      }
+      else { inline(b, out, annotated); }
+      if (idx < blocks.length - 1) out.push({ text: '\n\n' });
+    });
+    mdEl.textContent = '';
+    out.forEach(function (chunk) {
+      if (!chunk.text) return;
+      if (chunk.cls) {
+        var s = document.createElement('span');
+        s.className = chunk.cls;
+        s.textContent = chunk.text;
+        mdEl.appendChild(s);
+      } else {
+        mdEl.appendChild(document.createTextNode(chunk.text.replace(/ /g, ' ')));
+      }
+    });
+  }
+
+  Array.prototype.slice.call(document.querySelectorAll('.seg button')).forEach(function (b) {
+    b.addEventListener('click', function () {
+      format = b.getAttribute('data-format');
+      Array.prototype.slice.call(document.querySelectorAll('.seg button')).forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+      renderMarkdown();
+    });
+  });
+
+  /* ---------- Boot: two seeded comments so the end state is visible at once ---------- */
+  function seed(text, note, minutesAgo, resolved) {
+    var r = findRange(text);
+    if (!r) return;
+    var id = nextId();
+    if (!wrapRange(r, id, false)) return;
+    if (resolved) marksOf(id).forEach(function (m) { m.classList.add('resolved'); });
+    comments.push({ id: id, text: note, createdAt: Date.now() - minutesAgo * 60000, resolved: !!resolved });
+  }
+  seed('Reviewers used to Google Docs will not need instructions.', 'Check this holds for Notion users too. They expect comments on the right, not the left.', 14, false);
+  seed('the CriticMarkup convention', 'Confirm GitHub renders the braces literally and does not strip them as unknown syntax.', 6, false);
+  render();
+
+  var resizeTimer;
+  window.addEventListener('resize', function () { clearTimeout(resizeTimer); resizeTimer = setTimeout(layout, 60); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(layout);
+  setInterval(function () {
+    Array.prototype.slice.call(bubblesEl.querySelectorAll('.bubble:not(.composer)')).forEach(function (el) {
+      var c = commentById(el.getAttribute('data-id'));
+      if (c) el.querySelector('.time').textContent = timeAgo(c.createdAt);
+    });
+  }, 30000);
+})();
+</script>

@@ -9,9 +9,12 @@ import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
 import { TableHeader } from "@tiptap/extension-table-header";
 import { TableCell } from "@tiptap/extension-table-cell";
+import Image from "@tiptap/extension-image";
 import { InlineCheckbox } from "../extensions/InlineCheckbox";
 import { MermaidBlock } from "../extensions/MermaidBlock";
 import { HeadingWithId } from "../extensions/HeadingWithId";
+import { CommentMark } from "../extensions/CommentMark";
+import { CommentAnchor } from "../extensions/CommentAnchor";
 import { createLowlight } from "lowlight";
 
 // Import specific languages for smaller bundle size (~50KB vs ~1MB for all)
@@ -170,6 +173,15 @@ export function useTipTapEditor(
       TableHeader,
       TableCell,
       InlineCheckbox,
+      CommentMark,
+      CommentAnchor,
+      Image.configure({
+        inline: false,
+        allowBase64: true,
+        HTMLAttributes: {
+          class: "max-w-full h-auto rounded",
+        },
+      }),
     ],
     content: initialContent || "",
     editable: true,

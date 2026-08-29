@@ -21,6 +21,10 @@ npm run package             # Build and create .vsix
 
 Press F5 in VS Code to launch Extension Development Host.
 
+Standalone browser harness (no VS Code): run `npm run dev:webview`, then open
+`http://localhost:5173/dev.html?file=<url-encoded absolute path to a .md>`. `src/webview/dev.html`
+shims `acquireVsCodeApi`; it is never bundled.
+
 ## Architecture
 
 ### Dual Build System

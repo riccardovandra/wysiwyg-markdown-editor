@@ -4,6 +4,7 @@ import { outputChannel } from './outputChannel';
 import { editorRegistry } from './editorRegistry';
 import { cooldownManager } from './cooldownManager';
 import { handleLinkClick } from './linkHandler';
+import { logRemovedComments } from './commentHistory';
 import type { EditorSettings } from '../shared/messages.types';
 
 /**
@@ -58,6 +59,49 @@ async function closeRelatedTextEditors(documentUri: string): Promise<void> {
 }
 
 /**
+ * Builds the Content Security Policy meta tag value used in the WebView HTML.
+ *
+ * Exposed for testability (Story 13.1, AC8).
+ *
+ * - `default-src 'none'` baseline
+ * - `img-src` allows the webview origin, `https:`, and `data:` (NOT `http:`)
+ * - styles allow webview origin + inline (Tailwind generated styles)
+ * - scripts are nonce-locked with strict-dynamic
+ */
+export function buildContentSecurityPolicy(cspSource: string, nonce: string): string {
+	return (
+		`default-src 'none'; ` +
+		`img-src ${cspSource} https: data:; ` +
+		`style-src ${cspSource} 'unsafe-inline'; ` +
+		`script-src 'nonce-${nonce}' 'strict-dynamic'; ` +
+		`font-src ${cspSource};`
+	);
+}
+
+/**
+ * Computes the localResourceRoots array for the WebView based on the
+ * extension URI, the document being edited, and (when present) the
+ * workspace folder containing the document.
+ *
+ * Exposed for testability (Story 13.1, AC2/AC3).
+ */
+export function computeLocalResourceRoots(
+	extensionUri: vscode.Uri,
+	documentUri: vscode.Uri,
+	workspaceFolder: vscode.WorkspaceFolder | undefined
+): vscode.Uri[] {
+	const documentDir = vscode.Uri.joinPath(documentUri, '..');
+	const roots: vscode.Uri[] = [
+		vscode.Uri.joinPath(extensionUri, 'dist', 'webview'),
+		documentDir,
+	];
+	if (workspaceFolder) {
+		roots.push(workspaceFolder.uri);
+	}
+	return roots;
+}
+
+/**
  * Reads all editor settings from VS Code configuration.
  */
 function getEditorSettings(): EditorSettings {
@@ -99,16 +143,40 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 		// Track if the edit was initiated by us to avoid circular updates
 		let isOwnEdit = false;
 
+		// Last document text we processed, used to detect resolved comments
+		// (removed in the editor, or deleted by an agent editing the file).
+		let knownText = document.getText();
+
 		// Promise resolver for flush completion
 		let flushResolve: (() => void) | null = null;
 
 		// Configure WebView options
+		// localResourceRoots controls which local files the WebView can load.
+		// We expand this to include the document's directory and (when present)
+		// the workspace folder so that relative-path images can be rendered (Story 13.1).
+		const documentDir = vscode.Uri.joinPath(document.uri, '..');
+		const workspaceFolder = vscode.workspace.getWorkspaceFolder(document.uri);
+
+		const localResourceRoots = computeLocalResourceRoots(
+			this.context.extensionUri,
+			document.uri,
+			workspaceFolder
+		);
+
 		webviewPanel.webview.options = {
 			enableScripts: true,
-			localResourceRoots: [
-				vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'webview')
-			]
+			localResourceRoots
 		};
+
+		outputChannel.log(
+			`localResourceRoots: ${localResourceRoots.map(u => u.fsPath).join(', ')}`
+		);
+
+		// Pre-resolve the document directory to a webview-safe URI so the WebView
+		// can rewrite relative image paths (extension-side `asWebviewUri` only).
+		const documentBaseUri = webviewPanel.webview
+			.asWebviewUri(documentDir)
+			.toString();
 
 		// Set initial HTML content
 		webviewPanel.webview.html = this.getHtmlForWebview(webviewPanel.webview);
@@ -181,16 +249,21 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 						webviewPanel.webview.postMessage({
 							type: 'init',
 							content: content,
-							settings
+							settings,
+							documentBaseUri
 						});
 						outputChannel.log(`Sent init message with ${content.length} characters, settings: ${JSON.stringify(settings)}`);
 						return;
 					}
 
-					case 'contentChanged':
+					case 'contentChanged': {
 						outputChannel.log('Content changed in WebView');
+						const previous = document.getText();
 						await updateDocument(message.markdown);
+						knownText = message.markdown;
+						await logRemovedComments(document.uri, previous, message.markdown, 'editor');
 						return;
+					}
 
 					case 'contentFlushed':
 						outputChannel.log('Content flush confirmed by WebView');
@@ -226,10 +299,15 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 				}
 				// External change detected - notify WebView
 				outputChannel.log('External document change detected');
+				const newText = e.document.getText();
 				webviewPanel.webview.postMessage({
 					type: 'externalChange',
-					content: e.document.getText()
+					content: newText,
+					documentBaseUri
 				});
+				const previous = knownText;
+				knownText = newText;
+				void logRemovedComments(document.uri, previous, newText, 'external');
 			}
 		});
 
@@ -280,12 +358,14 @@ export class MarkdownEditorProvider implements vscode.CustomTextEditorProvider {
 		// Generate nonce for script security
 		const nonce = getNonce();
 
+		const csp = buildContentSecurityPolicy(webview.cspSource, nonce);
+
 		return `<!DOCTYPE html>
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src ${webview.cspSource} 'unsafe-inline'; script-src 'nonce-${nonce}' 'strict-dynamic'; font-src ${webview.cspSource};">
+	<meta http-equiv="Content-Security-Policy" content="${csp}">
 	<link href="${styleUri}" rel="stylesheet">
 	<title>${EXTENSION_NAME}</title>
 </head>

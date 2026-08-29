@@ -91,6 +91,11 @@ development_status:
   11-1-open-linked-files-wysiwyg: ready-for-dev
   11-7-go-to-definition-header-anchors: review
 
+  # Epic 13: Media Preview
+  epic-13: in-progress
+  13-1-image-preview: review
+  13-2-video-preview: backlog
+
 # Story Files Reference
 story_files:
   1-1-project-scaffold: docs/sprint-artifacts/1-1-project-scaffold.md
@@ -133,12 +138,14 @@ story_files:
   10-4-auto-open-replaces-text-tab: docs/sprint-artifacts/10-4-auto-open-replaces-text-tab.md
   11-1-open-linked-files-wysiwyg: docs/sprint-artifacts/11-1-open-linked-files-wysiwyg.md
   11-7-go-to-definition-header-anchors: docs/sprint-artifacts/11-7-go-to-definition-header-anchors.md
+  13-1-image-preview: docs/sprint-artifacts/13-1-image-preview.md
+  13-2-video-preview: docs/sprint-artifacts/13-2-video-preview.md
 
 # Sprint Progress
 progress:
-  total_stories: 38
-  backlog: 0  # All stories drafted
-  ready_for_dev: 8  # 4 retrospectives + 10.2, 10.3, 11.1, 11.7
+  total_stories: 40
+  backlog: 1  # 13-2
+  ready_for_dev: 9  # 4 retrospectives + 10.2, 10.3, 11.1, 11.7, 13.1
   in_progress: 0
   review: 6  # 5.2, 5.3, 5.4, 5.5, 5.6, 10.1
   done: 29  # Epics 1-4, Epic 5 (5.1, 5.7), Epic 6-9 (all stories)

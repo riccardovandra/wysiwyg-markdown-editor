@@ -1624,6 +1624,123 @@ So that I don't experience frustrating re-open loops.
 
 ---
 
+## Epic 13: Media Preview
+
+**Goal:** Render images and videos inline in the WYSIWYG editor and provide toolbar insertion. After this epic, users can see media referenced in their markdown without leaving the editor, and insert new media via the toolbar.
+
+**User Value:** Markdown documents that reference images and videos display them visually instead of showing raw `![alt](src)` syntax. Authors can drop in media without remembering markdown/HTML syntax.
+
+**PRD Coverage:** New functional requirements (FR42, FR43)
+**Architecture Sections:** WebView CSP, `localResourceRoots`, TipTap Extensions, message protocol
+
+**Status:** 📋 Backlog
+
+---
+
+### Story 13.1: Image Preview (Render + Toolbar Insert)
+
+As a user,
+I want images referenced in my markdown to render inline,
+And to insert images via the toolbar,
+So that I can see and add visual content without leaving the WYSIWYG editor or remembering markdown syntax.
+
+**Acceptance Criteria:**
+
+**Given** a markdown document contains `![alt text](https://example.com/image.png)`
+**When** the document renders
+**Then** the image is displayed inline at that position with the alt text as the accessible name (FR42)
+
+**Given** a markdown document contains a relative path like `![diagram](./images/diagram.png)` or `![](../assets/photo.jpg)`
+**When** the document renders
+**Then** the path is resolved relative to the document's location and the image displays correctly
+
+**Given** a markdown document contains an absolute path or `file://` URI
+**When** the document renders
+**Then** the image displays correctly
+
+**Given** an image source is broken or missing
+**When** the document renders
+**Then** a fallback placeholder is shown (browser default broken-image UI is acceptable) and the editor does not crash
+
+**Given** I click the Image button in the toolbar
+**When** the dialog opens
+**Then** I can enter a URL/path and optional alt text
+**And** clicking Insert places `![alt](src)` at the cursor
+**And** clicking Cancel closes the dialog without changes
+
+**Given** I have inserted or already have an image in the document
+**When** the document is serialized back to markdown
+**Then** the original `![alt](src)` syntax is preserved (relative paths stay relative, remote URLs stay as-is — webview URIs are NOT leaked into the saved file)
+
+**Given** common image formats (PNG, JPG/JPEG, GIF, WebP, SVG)
+**When** they are rendered
+**Then** all supported formats display correctly
+
+**Prerequisites:** Epic 4 complete (toolbar infrastructure)
+
+**Technical Notes:**
+- Use `@tiptap/extension-image` (TipTap-official, supports `src`, `alt`, `title` attrs)
+- WebView CSP must add `img-src ${webview.cspSource} https: data:;` to existing policy in `editorProvider.getHtmlForWebview`
+- `webviewPanel.webview.options.localResourceRoots` must include the document's parent directory (or the workspace folder) — currently only `dist/webview`
+- Path resolution strategy: extension computes a `documentBaseUri` via `webview.asWebviewUri(documentDir)` and includes it on the `init`/`externalChange` messages; webview rewrites relative `src` attributes during markdown→HTML, and rewrites them back to original paths during HTML→markdown. Remote and `file://` URIs pass through unchanged.
+- Toolbar follows the LinkDialog pattern: `ImageDialog.tsx` modal + button slot in `Toolbar.tsx` (insert group, between Link and Code)
+- Markdown round-trip: `marked` already produces `<img>` and `turndown` already serializes it — only the `src` rewriting layer is custom
+
+**Source hints:**
+- [editorProvider.ts:106-111](wysiwyg-markdown-editor/src/extension/editorProvider.ts#L106-L111) — current `localResourceRoots`
+- [editorProvider.ts:288](wysiwyg-markdown-editor/src/extension/editorProvider.ts#L288) — current CSP
+- [useTipTapEditor.ts:109-173](wysiwyg-markdown-editor/src/webview/hooks/useTipTapEditor.ts#L109-L173) — extension list
+- [LinkDialog.tsx](wysiwyg-markdown-editor/src/webview/components/LinkDialog.tsx) — pattern to mirror
+- [messages.types.ts](wysiwyg-markdown-editor/src/shared/messages.types.ts) — extend `init`/`externalChange` with `documentBaseUri`
+
+---
+
+### Story 13.2: Video Preview (Render + Toolbar Insert)
+
+As a user,
+I want videos referenced in my markdown to render inline,
+And to insert videos via the toolbar,
+So that I can preview video content directly in the WYSIWYG editor.
+
+**Acceptance Criteria:**
+
+**Given** a markdown document contains an HTML `<video>` tag with `src` (or nested `<source>`)
+**When** the document renders
+**Then** the video is displayed inline with native browser controls (FR43)
+
+**Given** a video uses a relative path like `<video src="./clips/demo.mp4" controls></video>`
+**When** the document renders
+**Then** the path is resolved relative to the document's location (same resolution layer as images)
+
+**Given** an unsupported or broken video source
+**When** the document renders
+**Then** the editor shows a graceful fallback (browser default behavior is acceptable) and does not crash
+
+**Given** I click the Video button in the toolbar
+**When** the dialog opens
+**Then** I can enter a URL/path
+**And** clicking Insert places an HTML `<video controls>` tag at the cursor
+**And** clicking Cancel closes the dialog without changes
+
+**Given** I have a video in the document
+**When** the document is serialized back to markdown
+**Then** the `<video>` tag is preserved verbatim (markdown has no video syntax — HTML embed is the canonical form)
+
+**Given** common video formats (MP4, WebM, OGG)
+**When** they are rendered
+**Then** all browser-supported formats display correctly
+
+**Prerequisites:** Story 13.1 (path resolution + CSP foundation must already exist)
+
+**Technical Notes:**
+- Custom TipTap node `Video` (no first-party extension) parsing `<video>` and rendering with `controls` attr — see MermaidBlock pattern at [MermaidBlock.ts](wysiwyg-markdown-editor/src/webview/extensions/MermaidBlock.ts)
+- CSP must add `media-src ${webview.cspSource} https:;` to the policy
+- `localResourceRoots` reuses 13.1's setup
+- Markdown serializer must emit raw HTML for the video node — `turndown` passes HTML through by default but the custom node needs a serializer rule
+- `marked` handles inline HTML by default (gfm: true), so no custom parser transform should be needed — verify in implementation
+
+---
+
 ## Updated FR Coverage Matrix
 
 | Functional Requirement | Epic | Story | Implementation |

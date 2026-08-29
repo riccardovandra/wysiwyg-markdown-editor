@@ -1,6 +1,8 @@
+import { useRef } from 'react';
 import { EditorContent } from '@tiptap/react';
 import type { Editor as TipTapEditor } from '@tiptap/react';
 import type { EditorSettings } from '../../shared/messages.types';
+import { CommentGutter } from './CommentGutter';
 
 interface EditorProps {
   editor: TipTapEditor | null;
@@ -26,15 +28,22 @@ const paddingClasses = {
  * - Constrained reading width (~65ch) for optimal readability
  * - Responsive padding that adjusts to viewport width
  * - Configurable card display and padding
+ * - Margin comments (CommentGutter) positioned against the card
  */
 export function Editor({ editor, showCard = true, contentPadding = 'medium' }: EditorProps) {
   const padding = paddingClasses[contentPadding];
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Card mode: full styling with background, shadow, rounded corners
-  if (showCard) {
-    return (
-      <div className="min-h-full">
-        <div className="max-w-4xl mx-auto bg-dark-elevated rounded-xl shadow-2xl shadow-black/40">
+  const cardClasses = showCard
+    ? 'bg-dark-elevated rounded-xl shadow-2xl shadow-black/40'
+    : '';
+
+  return (
+    <div className="min-h-full">
+      {/* The wrapper is the positioning context for comment bubbles and the floating button */}
+      <div ref={containerRef} className="relative max-w-4xl mx-auto">
+        <div className={cardClasses}>
           <div className={padding}>
             <EditorContent
               editor={editor}
@@ -42,18 +51,7 @@ export function Editor({ editor, showCard = true, contentPadding = 'medium' }: E
             />
           </div>
         </div>
-      </div>
-    );
-  }
-
-  // No-card mode: minimal margin, no background/shadow
-  return (
-    <div className="min-h-full">
-      <div className={`max-w-4xl mx-auto ${padding}`}>
-        <EditorContent
-          editor={editor}
-          className="prose prose-lg"
-        />
+        <CommentGutter editor={editor} containerRef={containerRef} />
       </div>
     </div>
   );

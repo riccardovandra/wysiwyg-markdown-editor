@@ -2,6 +2,7 @@ import { useEffect, useReducer, useState } from 'react';
 import type { Editor } from '@tiptap/react';
 import { LinkDialog } from './LinkDialog';
 import { TableDialog } from './TableDialog';
+import { ImageDialog } from './ImageDialog';
 import {
   Bold,
   Italic,
@@ -22,6 +23,7 @@ import {
   FileCode,
   Eye,
   Code2,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 /**
@@ -134,6 +136,9 @@ export function Toolbar({
   // Table dialog state
   const [tableDialogOpen, setTableDialogOpen] = useState(false);
 
+  // Image dialog state
+  const [imageDialogOpen, setImageDialogOpen] = useState(false);
+
   // Force re-render when editor state changes (selection, formatting, etc.)
   // This ensures active states update immediately when cursor moves
   const [, forceUpdate] = useReducer((x) => x + 1, 0);
@@ -195,6 +200,24 @@ export function Toolbar({
 
   const handleTableCancel = () => {
     setTableDialogOpen(false);
+    editor?.commands.focus();
+  };
+
+  // Image dialog handlers
+  const handleImageClick = () => {
+    setImageDialogOpen(true);
+  };
+
+  const handleImageConfirm = (url: string, alt: string) => {
+    if (url && editor) {
+      // setImage is provided by @tiptap/extension-image
+      editor.chain().focus().setImage({ src: url, alt }).run();
+    }
+    setImageDialogOpen(false);
+  };
+
+  const handleImageCancel = () => {
+    setImageDialogOpen(false);
     editor?.commands.focus();
   };
 
@@ -312,6 +335,12 @@ export function Toolbar({
         disabled={isDisabled}
       />
       <ToolbarButton
+        icon={<ImageIcon className={iconSize} />}
+        tooltip="Insert Image"
+        onClick={handleImageClick}
+        disabled={isDisabled}
+      />
+      <ToolbarButton
         icon={<Code className={iconSize} />}
         tooltip="Code Block"
         isActive={editor?.isActive('codeBlock') ?? false}
@@ -392,6 +421,13 @@ export function Toolbar({
         isOpen={tableDialogOpen}
         onConfirm={handleTableConfirm}
         onCancel={handleTableCancel}
+      />
+
+      {/* Image Dialog */}
+      <ImageDialog
+        isOpen={imageDialogOpen}
+        onConfirm={handleImageConfirm}
+        onCancel={handleImageCancel}
       />
     </div>
   );

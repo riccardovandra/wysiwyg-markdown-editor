@@ -54,7 +54,6 @@ async function preRenderMermaidBlocks(markdown: string): Promise<void> {
 
 export default function App() {
   const vscode = useVSCodeApi();
-  const isExternalUpdate = useRef(false);
   const [isToolbarHidden, setIsToolbarHidden] = useState(true);
   const [showCard, setShowCard] = useState(true);
   const [contentPadding, setContentPadding] =
@@ -81,6 +80,10 @@ export default function App() {
   const [viewMode, setViewMode] = useState<"visual" | "source">("visual");
   // Holds markdown content when in source mode
   const [sourceContent, setSourceContent] = useState("");
+  // Document base URI for rewriting relative image paths (Story 13.1).
+  // The extension pre-resolves `vscode.Uri.joinPath(document.uri, '..')`
+  // through `webview.asWebviewUri()` and forwards it on init/externalChange.
+  const documentBaseUriRef = useRef<string>("");
 
   // Toggle handler for toolbar visibility
   const handleToggleToolbar = useCallback(() => {
@@ -142,12 +145,10 @@ export default function App() {
   // Handle editor content updates
   const handleEditorUpdate = useCallback(
     (html: string) => {
-      // Skip if this update was triggered by external change
-      if (isExternalUpdate.current) {
-        isExternalUpdate.current = false;
-        return;
-      }
-      const bodyMarkdown = serializeHtmlToMarkdown(html);
+      const bodyMarkdown = serializeHtmlToMarkdown(
+        html,
+        documentBaseUriRef.current,
+      );
       const fullMarkdown = combineFrontmatter(
         frontmatterRef.current,
         bodyMarkdown,
@@ -193,7 +194,10 @@ export default function App() {
       // Switching TO source: serialize current TipTap content to markdown
       if (editor) {
         const html = editor.getHTML();
-        const bodyMarkdown = serializeHtmlToMarkdown(html);
+        const bodyMarkdown = serializeHtmlToMarkdown(
+          html,
+          documentBaseUriRef.current,
+        );
         const fullMarkdown = combineFrontmatter(
           frontmatterRef.current,
           bodyMarkdown,
@@ -207,9 +211,8 @@ export default function App() {
       setFrontmatter(fm);
       frontmatterRef.current = fm;
       if (editor) {
-        isExternalUpdate.current = true;
-        const html = parseMarkdownToHtml(content);
-        editor.commands.setContent(html);
+        const html = parseMarkdownToHtml(content, documentBaseUriRef.current);
+        editor.commands.setContent(html, { emitUpdate: false });
       }
       setViewMode("visual");
     }
@@ -228,8 +231,11 @@ export default function App() {
 
       switch (message.type) {
         case "init": {
+          // Capture document base URI BEFORE any parse so relative image
+          // paths can be rewritten to webview-safe URIs (Story 13.1).
+          documentBaseUriRef.current = message.documentBaseUri || "";
+
           if (editor) {
-            isExternalUpdate.current = true;
             const { frontmatter: fm, content } = extractFrontmatter(
               message.content,
             );
@@ -239,7 +245,10 @@ export default function App() {
             // Pre-render mermaid blocks into cache BEFORE setContent.
             // This ensures MermaidDiagram components find cached SVGs on their
             // first render, avoiding async timing issues with TipTap's NodeView lifecycle.
-            const html = parseMarkdownToHtml(content);
+            const html = parseMarkdownToHtml(
+              content,
+              documentBaseUriRef.current,
+            );
             const hasMermaid = html.includes("mermaid");
 
             if (hasMermaid) {
@@ -250,13 +259,12 @@ export default function App() {
               // This is necessary because TipTap's ReactNodeViewRenderer
               // destroys React components during the initial setContent processing.
               await preRenderMermaidBlocks(content);
-              editor.commands.setContent(html);
+              editor.commands.setContent(html, { emitUpdate: false });
               requestAnimationFrame(() => {
-                isExternalUpdate.current = true;
-                editor.commands.setContent(html);
+                editor.commands.setContent(html, { emitUpdate: false });
               });
             } else {
-              editor.commands.setContent(html);
+              editor.commands.setContent(html, { emitUpdate: false });
             }
           }
           // Apply initial settings
@@ -266,25 +274,30 @@ export default function App() {
           break;
         }
         case "externalChange": {
+          // Refresh base URI - it should be stable, but external changes
+          // are the canonical re-sync moment so trust the latest value.
+          documentBaseUriRef.current = message.documentBaseUri || "";
+
           if (editor) {
-            isExternalUpdate.current = true;
             const { frontmatter: fm, content } = extractFrontmatter(
               message.content,
             );
             setFrontmatter(fm);
             frontmatterRef.current = fm;
-            const html = parseMarkdownToHtml(content);
+            const html = parseMarkdownToHtml(
+              content,
+              documentBaseUriRef.current,
+            );
             const hasMermaid = html.includes("mermaid");
 
             if (hasMermaid) {
               await preRenderMermaidBlocks(content);
-              editor.commands.setContent(html);
+              editor.commands.setContent(html, { emitUpdate: false });
               requestAnimationFrame(() => {
-                isExternalUpdate.current = true;
-                editor.commands.setContent(html);
+                editor.commands.setContent(html, { emitUpdate: false });
               });
             } else {
-              editor.commands.setContent(html);
+              editor.commands.setContent(html, { emitUpdate: false });
             }
           }
           break;
@@ -293,7 +306,10 @@ export default function App() {
           // Immediately sync content (bypass debounce) before save
           if (editor) {
             const html = editor.getHTML();
-            const bodyMarkdown = serializeHtmlToMarkdown(html);
+            const bodyMarkdown = serializeHtmlToMarkdown(
+              html,
+              documentBaseUriRef.current,
+            );
             const fullMarkdown = combineFrontmatter(
               frontmatterRef.current,
               bodyMarkdown,
@@ -407,7 +423,10 @@ export default function App() {
       // Trigger content sync with updated frontmatter
       if (editor) {
         const html = editor.getHTML();
-        const bodyMarkdown = serializeHtmlToMarkdown(html);
+        const bodyMarkdown = serializeHtmlToMarkdown(
+          html,
+          documentBaseUriRef.current,
+        );
         const fullMarkdown = combineFrontmatter(newFrontmatter, bodyMarkdown);
         debouncedSendContent(fullMarkdown);
       }

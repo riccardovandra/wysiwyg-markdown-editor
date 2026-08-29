@@ -28,8 +28,8 @@ export interface EditorSettings {
  * Messages sent FROM Extension TO WebView
  */
 export type ExtensionMessage =
-  | { type: 'init'; content: string; settings?: EditorSettings }
-  | { type: 'externalChange'; content: string }
+  | { type: 'init'; content: string; settings?: EditorSettings; documentBaseUri: string }
+  | { type: 'externalChange'; content: string; documentBaseUri: string }
   | { type: 'flushContent' }
   | { type: 'settingsUpdate'; settings: EditorSettings };
 

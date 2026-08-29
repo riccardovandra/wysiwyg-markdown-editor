@@ -202,6 +202,13 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	);
 
+	// Copy the agent protocol for applying comments (see resources/agent-comments-protocol.md)
+	context.subscriptions.push(
+		vscode.commands.registerCommand('markdownWysiwyg.copyAgentInstructions', () =>
+			copyAgentInstructions(context)
+		)
+	);
+
 	// Register open text editor command (switch from visual editor back to text)
 	context.subscriptions.push(
 		vscode.commands.registerCommand('markdownWysiwyg.openTextEditor', async (uri?: vscode.Uri) => {
@@ -225,6 +232,22 @@ export function activate(context: vscode.ExtensionContext) {
 			}
 		})
 	);
+}
+
+/**
+ * Copies the agent protocol for applying comments to the clipboard, so it can
+ * be pasted into a CLAUDE.md, a skill, or a one-off prompt.
+ */
+export async function copyAgentInstructions(context: vscode.ExtensionContext): Promise<void> {
+	const uri = vscode.Uri.joinPath(context.extensionUri, 'resources', 'agent-comments-protocol.md');
+	try {
+		const text = Buffer.from(await vscode.workspace.fs.readFile(uri)).toString('utf8');
+		await vscode.env.clipboard.writeText(text);
+		vscode.window.showInformationMessage('Agent instructions for comments copied to the clipboard.');
+	} catch (error) {
+		const message = error instanceof Error ? error.message : 'Unknown error';
+		vscode.window.showErrorMessage(`Could not read agent instructions: ${message}`);
+	}
 }
 
 // This method is called when your extension is deactivated

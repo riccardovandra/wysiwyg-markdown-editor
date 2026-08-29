@@ -259,3 +259,21 @@ Built with:
 - [Tailwind CSS](https://tailwindcss.com/) — Styling
 - [Marked](https://marked.js.org/) — Markdown parsing
 - [Turndown](https://github.com/mixmark-io/turndown) — HTML to Markdown conversion
+
+## Comments
+
+Select text in the visual editor and press **Comment**. The note appears as a bubble in the left margin, anchored to the highlighted text. Selecting inside a code block attaches the comment to the block instead.
+
+Comments are stored inline in the markdown file using [CriticMarkup](http://criticmarkup.com/):
+
+```md
+The report {==shows a 12% increase==}{>>double-check this number<<} over last quarter.
+```
+
+A thread is a run of notes: `{==text==}{>>note<<}{>>Claude: reply<<}`. A note without a highlight (`{>>note<<}`) refers to the paragraph or block it sits in.
+
+**Resolve** deletes the comment from the file; the text stays. Every resolved comment (whether removed in the editor or by an agent editing the file) is appended to `<name>.comments.md` next to the document. Turn this off with `markdownWysiwyg.commentHistory`.
+
+### Working with an AI agent
+
+Because comments live in the file next to the text they refer to, an agent such as Claude Code can act on them directly: `grep -n '{>>' file.md` lists every open comment. Run **Markdown WYSIWYG: Copy Agent Instructions for Comments** to copy a short protocol you can paste into your `CLAUDE.md` or a prompt. It tells the agent to apply each note to its highlighted text, delete the comment when done, and reply with `{>>Claude: ...<<}` when it needs a decision. Replies show up in the margin the next time the file is reloaded.

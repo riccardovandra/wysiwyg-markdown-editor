@@ -786,7 +786,7 @@ body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-selector-id,
   padding: 0.5rem 0.75rem;
   border: 1px solid var(--color-border-default);
   color: var(--color-text-primary);
-  white-space: nowrap;
+  white-space: normal;
 }
 
 /* Table data cells */
@@ -795,7 +795,7 @@ body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-selector-id,
   border: 1px solid var(--color-border-default);
   color: var(--color-text-primary);
   vertical-align: top;
-  white-space: nowrap;
+  white-space: normal;
 }
 
 /* Alternating row colors */
@@ -807,14 +807,47 @@ body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-selector-id,
   background-color: transparent;
 }
 
+/* ============================================
+   Wide blocks: tables and code blocks (Bug #1)
+   Wide content used to overflow the reading column and force the whole
+   page to scroll sideways. Wide blocks now grow past the column, stay
+   centered on the viewport, and cap at the viewport width. Anything still
+   wider than that scrolls inside its own box, never the page.
+   ============================================ */
+
+.ProseMirror {
+  /* Viewport width minus breathing room for the outer padding + scrollbar */
+  --wide-block-max: calc(100vw - 4rem);
+}
+
+.ProseMirror > .tableWrapper,
+.ProseMirror > pre {
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: max-content;
+  min-width: 100%;
+  max-width: var(--wide-block-max);
+}
+
+.ProseMirror > .tableWrapper {
+  margin: 0.75em 0;
+  overflow-x: auto;
+}
+
 /* TipTap table selection styling */
 .ProseMirror table {
   width: auto;
   max-width: 100%;
   border-collapse: collapse;
-  margin: 0.75em 0;
+  margin: 0;
   table-layout: auto;
-  overflow: hidden;
+}
+
+/* Tables rendered without the resizable wrapper keep their own margin */
+.ProseMirror > table {
+  margin: 0.75em 0;
 }
 
 .ProseMirror th,
@@ -825,7 +858,8 @@ body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-selector-id,
   vertical-align: top;
   box-sizing: border-box;
   position: relative;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .ProseMirror th {
@@ -875,15 +909,6 @@ body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-selector-id,
   outline-offset: 2px;
 }
 
-/* Responsive table - allow wrapping on smaller screens */
-@media (max-width: 768px) {
-  .prose th,
-  .prose td,
-  .ProseMirror th,
-  .ProseMirror td {
-    white-space: normal;
-  }
-}
 
 /* ============================================
    Inline Checkbox Styling (Table Cells)
@@ -989,4 +1014,335 @@ span[data-type="inline-checkbox"] input[type="checkbox"]:checked::after {
 .frontmatter-textarea::selection {
   background-color: var(--color-selection-bg);
   color: transparent;
+}
+
+/* ============================================
+   Comments (CriticMarkup)
+   Highlights in the text, bubbles in the left margin.
+   ============================================ */
+
+:root {
+  --comment-hl: rgba(251, 191, 36, 0.26);
+  --comment-hl-strong: rgba(251, 191, 36, 0.5);
+  --comment-line: #f59e0b;
+  --comment-ink: #fcd34d;
+}
+
+body[data-vscode-theme-kind="vscode-light"],
+body[data-vscode-theme-kind="vscode-high-contrast-light"] {
+  --comment-hl: rgba(245, 158, 11, 0.3);
+  --comment-hl-strong: rgba(245, 158, 11, 0.55);
+  --comment-line: #d97706;
+  --comment-ink: #92400e;
+}
+
+/* Highlighted text */
+.ProseMirror mark.comment-mark,
+.ProseMirror .comment-pending {
+  background: var(--comment-hl);
+  color: inherit;
+  border-bottom: 2px solid var(--comment-line);
+  padding: 0.1em 0;
+  border-radius: 3px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ProseMirror .comment-pending,
+.ProseMirror mark.comment-mark.comment-active {
+  background: var(--comment-hl-strong);
+}
+
+/* Anchor-only comment: a small pin in the text */
+.ProseMirror .comment-anchor {
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  margin: 0 0.15em;
+  border-radius: 50%;
+  background: var(--comment-line);
+  vertical-align: middle;
+  cursor: pointer;
+  box-shadow: 0 0 0 3px var(--comment-hl);
+}
+
+.ProseMirror .comment-anchor.comment-active {
+  box-shadow: 0 0 0 5px var(--comment-hl-strong);
+}
+
+/* Floating button above the selection */
+.comment-btn {
+  position: absolute;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 11px 6px 9px;
+  border: 1px solid var(--color-border-emphasis);
+  border-radius: 999px;
+  background: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+
+.comment-btn svg {
+  color: var(--comment-line);
+}
+
+.comment-btn:hover {
+  background: var(--color-bg-hover);
+}
+
+/* Gutter: absolute layer over the card wrapper */
+.comment-gutter {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.comment-gutter > * {
+  pointer-events: none;
+}
+
+.comment-bubble,
+.comment-pin {
+  pointer-events: auto;
+}
+
+.comment-bubble {
+  position: absolute;
+  width: 260px;
+  box-sizing: border-box;
+  padding: 11px 13px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 12px;
+  background: var(--color-bg-elevated);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--color-text-primary);
+  transition: top 0.2s ease, border-color 0.15s ease;
+  z-index: 10;
+}
+
+.comment-bubble::after {
+  content: "";
+  position: absolute;
+  top: 18px;
+  left: 100%;
+  width: 16px;
+  border-top: 1px dashed var(--color-border-emphasis);
+  pointer-events: none;
+}
+
+.comment-bubble.is-active,
+.comment-composer {
+  border-color: var(--comment-line);
+}
+
+.comment-bubble.is-active::after,
+.comment-composer::after {
+  border-top-style: solid;
+  border-top-color: var(--comment-line);
+}
+
+.comment-bubble.is-compact {
+  z-index: 30;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.comment-bubble.is-compact::after {
+  display: none;
+}
+
+.comment-bubble.is-flash {
+  animation: comment-flash 0.9s ease;
+}
+
+@keyframes comment-flash {
+  0%, 60% { box-shadow: 0 0 0 3px var(--comment-hl-strong); }
+  100% { box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3); }
+}
+
+.comment-quote {
+  margin: 0 0 8px;
+  padding-left: 8px;
+  border-left: 2px solid var(--comment-line);
+  font-size: 11.5px;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.comment-quote.is-anchor {
+  font-style: italic;
+}
+
+.comment-thread {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.comment-note {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.comment-author {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+}
+
+.comment-author.is-agent {
+  color: var(--color-accent-primary);
+}
+
+.comment-text {
+  overflow-wrap: anywhere;
+}
+
+.comment-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 8px;
+  min-height: 60px;
+  resize: vertical;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-surface);
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 1.45;
+  padding: 7px 9px;
+}
+
+.comment-composer .comment-textarea {
+  margin-top: 0;
+}
+
+.comment-textarea::placeholder {
+  color: var(--color-text-muted);
+}
+
+.comment-textarea:focus {
+  outline: 2px solid var(--color-accent-primary);
+  outline-offset: 1px;
+}
+
+.comment-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.comment-hint {
+  margin-right: auto;
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.comment-actions {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.comment-bubble:hover .comment-actions,
+.comment-bubble:focus-within .comment-actions,
+.comment-bubble.is-compact .comment-actions {
+  opacity: 1;
+}
+
+.comment-action {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  padding: 4px 9px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+}
+
+.comment-action:hover {
+  color: var(--color-text-primary);
+  background: var(--color-bg-hover);
+}
+
+.comment-action.is-primary {
+  background: var(--color-accent-primary);
+  border-color: var(--color-accent-primary);
+  color: var(--color-bg-base);
+}
+
+.comment-action.is-primary:hover {
+  filter: brightness(1.08);
+}
+
+.comment-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+}
+
+/* Compact mode: pins at the card edge */
+.comment-pin {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--color-border-emphasis);
+  border-radius: 50%;
+  background: var(--color-bg-elevated);
+  color: var(--comment-line);
+  cursor: pointer;
+  z-index: 10;
+}
+
+.comment-pin.is-open,
+.comment-pin.is-active {
+  border-color: var(--comment-line);
+  background: var(--comment-hl);
+}
+
+.comment-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 14px;
+  height: 14px;
+  padding: 0 3px;
+  border-radius: 999px;
+  background: var(--comment-line);
+  color: var(--color-bg-base);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .comment-bubble,
+  .ProseMirror mark.comment-mark,
+  .comment-actions {
+    transition: none;
+  }
+  .comment-bubble.is-flash {
+    animation: none;
+  }
 }

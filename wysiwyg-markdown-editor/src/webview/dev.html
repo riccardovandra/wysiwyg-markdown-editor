@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Markdown WYSIWYG (standalone dev harness)</title>
+  <script>
+    // Standalone dev harness: shims the VS Code webview API so the React app
+    // can run in a plain browser via `npm run dev:webview`.
+    //   http://localhost:5173/dev.html                -> built-in sample document
+    //   http://localhost:5173/dev.html?file=<abs path> -> load a markdown file from disk
+    // Never bundled: vite.config.ts only builds index.html.
+    (function () {
+      var DEFAULT_MD = [
+        '# Dev harness',
+        '',
+        'Open with `?file=/absolute/path/to/file.md` to load a real document.',
+      ].join('\n');
+
+      window.__wysiwygDev = { lastMarkdown: '', messages: [] };
+
+      function send(msg) {
+        window.postMessage(msg, '*');
+      }
+
+      async function loadContent() {
+        var file = new URLSearchParams(location.search).get('file');
+        if (!file) return DEFAULT_MD;
+        var res = await fetch('/@fs' + file);
+        if (!res.ok) return '# Could not load ' + file + ' (' + res.status + ')';
+        return await res.text();
+      }
+
+      window.acquireVsCodeApi = function () {
+        return {
+          postMessage: function (msg) {
+            window.__wysiwygDev.messages.push(msg);
+            if (msg.type === 'ready') {
+              loadContent().then(function (content) {
+                send({ type: 'init', content: content, settings: {}, documentBaseUri: '' });
+              });
+            } else if (msg.type === 'contentChanged') {
+              window.__wysiwygDev.lastMarkdown = msg.markdown;
+            } else if (msg.type === 'flushContent') {
+              send({ type: 'contentFlushed' });
+            }
+          },
+          getState: function () { return undefined; },
+          setState: function () {},
+        };
+      };
+    })();
+  </script>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="./index.tsx"></script>
+</body>
+</html>

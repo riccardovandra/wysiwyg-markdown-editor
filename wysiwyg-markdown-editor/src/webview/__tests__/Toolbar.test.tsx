@@ -973,4 +973,92 @@ describe('Toolbar', () => {
       });
     });
   });
+
+  describe('Story 13.1: Image Insertion', () => {
+    it('renders Insert Image button in toolbar', () => {
+      const editor = createMockEditor();
+      render(<Toolbar editor={editor} />);
+
+      expect(screen.getByTitle(/Insert Image/i)).toBeInTheDocument();
+    });
+
+    it('opens image dialog when Image button clicked', () => {
+      const editor = createMockEditor();
+      render(<Toolbar editor={editor} />);
+
+      const imageButton = screen.getByTitle(/Insert Image/i);
+      fireEvent.click(imageButton);
+
+      expect(screen.getByTestId('image-url-input')).toBeInTheDocument();
+      expect(screen.getByText('Insert Image')).toBeInTheDocument();
+    });
+
+    it('calls setImage on the editor when Insert is confirmed', () => {
+      const setImageMock = vi.fn().mockReturnValue({ run: vi.fn() });
+      const focusMock = vi.fn().mockReturnValue({
+        setImage: setImageMock,
+        toggleBold: vi.fn().mockReturnValue({ run: vi.fn() }),
+        toggleItalic: vi.fn().mockReturnValue({ run: vi.fn() }),
+        toggleHeading: vi.fn().mockReturnValue({ run: vi.fn() }),
+        toggleBulletList: vi.fn().mockReturnValue({ run: vi.fn() }),
+        toggleOrderedList: vi.fn().mockReturnValue({ run: vi.fn() }),
+        toggleCodeBlock: vi.fn().mockReturnValue({ run: vi.fn() }),
+        setLink: vi.fn().mockReturnValue({ run: vi.fn() }),
+        unsetLink: vi.fn().mockReturnValue({ run: vi.fn() }),
+        undo: vi.fn().mockReturnValue({ run: vi.fn() }),
+        redo: vi.fn().mockReturnValue({ run: vi.fn() }),
+      });
+      const chainMock = vi.fn().mockReturnValue({ focus: focusMock });
+
+      const editor = {
+        isActive: vi.fn().mockReturnValue(false),
+        can: vi.fn().mockReturnValue({ undo: () => false, redo: () => false }),
+        chain: chainMock,
+        on: vi.fn(),
+        off: vi.fn(),
+        getAttributes: vi.fn().mockReturnValue({}),
+        commands: { focus: vi.fn() },
+      } as unknown as Editor;
+
+      render(<Toolbar editor={editor} />);
+
+      // Open the dialog
+      fireEvent.click(screen.getByTitle(/Insert Image/i));
+
+      // Fill in URL and alt
+      const urlInput = screen.getByTestId('image-url-input');
+      fireEvent.change(urlInput, { target: { value: 'https://example.com/foo.png' } });
+
+      const altInput = screen.getByTestId('image-alt-input');
+      fireEvent.change(altInput, { target: { value: 'A foo image' } });
+
+      // Confirm
+      fireEvent.click(screen.getByTestId('image-confirm-button'));
+
+      expect(setImageMock).toHaveBeenCalledWith({
+        src: 'https://example.com/foo.png',
+        alt: 'A foo image',
+      });
+
+      // Dialog closes after confirm
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('closes dialog on cancel without calling setImage', () => {
+      const editor = createMockEditor();
+      render(<Toolbar editor={editor} />);
+
+      fireEvent.click(screen.getByTitle(/Insert Image/i));
+      expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('image-cancel-button'));
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('disables image button when editor is null', () => {
+      render(<Toolbar editor={null} />);
+      const imageButton = screen.getByTitle(/Insert Image/i);
+      expect(imageButton).toBeDisabled();
+    });
+  });
 });

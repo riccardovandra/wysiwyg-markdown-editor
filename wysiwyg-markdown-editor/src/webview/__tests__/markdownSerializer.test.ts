@@ -170,4 +170,67 @@ describe('markdownSerializer', () => {
       expect(result).toContain('[x] Task 2');
     });
   });
+
+  describe('Story 13.1: Image serialization', () => {
+    const baseUri = 'https://vscode-webview://abc/workspace/docs';
+
+    it('serializes <img> with src and alt to markdown image syntax', () => {
+      const html = '<p><img src="https://example.com/foo.png" alt="A foo"></p>';
+      const result = serializeHtmlToMarkdown(html);
+      expect(result).toContain('![A foo](https://example.com/foo.png)');
+    });
+
+    it('strips webview-prefixed src back to relative path', () => {
+      const html = `<p><img src="${baseUri}/images/flow.png" alt="diagram"></p>`;
+      const result = serializeHtmlToMarkdown(html, baseUri);
+      expect(result).toContain('![diagram](./images/flow.png)');
+      expect(result).not.toContain('vscode-webview');
+    });
+
+    it('leaves remote URLs unchanged when baseUri is provided', () => {
+      const html = '<p><img src="https://example.com/foo.png" alt=""></p>';
+      const result = serializeHtmlToMarkdown(html, baseUri);
+      expect(result).toContain('![](https://example.com/foo.png)');
+    });
+
+    it('leaves data URIs unchanged when baseUri is provided', () => {
+      const html =
+        '<p><img src="data:image/png;base64,iVBORw0KGgo" alt=""></p>';
+      const result = serializeHtmlToMarkdown(html, baseUri);
+      expect(result).toContain('![](data:image/png;base64,iVBORw0KGgo)');
+    });
+
+    it('preserves alt as empty string when missing', () => {
+      const html = '<p><img src="https://example.com/foo.png"></p>';
+      const result = serializeHtmlToMarkdown(html);
+      expect(result).toContain('![](https://example.com/foo.png)');
+    });
+  });
+
+  describe('Story 13.1: Image round-trip preserves original paths', () => {
+    const baseUri = 'https://vscode-webview://abc/workspace/docs';
+
+    it('preserves a relative image path through parse→serialize', () => {
+      const original = '![diagram](./images/flow.png)';
+      const html = parseMarkdownToHtml(original, baseUri);
+      const result = serializeHtmlToMarkdown(html, baseUri);
+      expect(result.trim()).toBe(original);
+    });
+
+    it('preserves a remote image URL through parse→serialize', () => {
+      const original = '![logo](https://example.com/logo.png)';
+      const html = parseMarkdownToHtml(original, baseUri);
+      const result = serializeHtmlToMarkdown(html, baseUri);
+      expect(result.trim()).toBe(original);
+    });
+
+    it('never writes vscode-webview URIs back to markdown', () => {
+      const original = '![](./flow.png)';
+      const html = parseMarkdownToHtml(original, baseUri);
+      // Sanity: the rewrite did happen in HTML
+      expect(html).toContain(baseUri);
+      const result = serializeHtmlToMarkdown(html, baseUri);
+      expect(result).not.toContain('vscode-webview');
+    });
+  });
 });
