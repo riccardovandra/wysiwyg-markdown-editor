@@ -3,6 +3,7 @@ import { EditorContent } from '@tiptap/react';
 import type { Editor as TipTapEditor } from '@tiptap/react';
 import type { EditorSettings } from '../../shared/messages.types';
 import { CommentGutter } from './CommentGutter';
+import { useWideBlockBounds } from '../hooks/useWideBlockBounds';
 
 interface EditorProps {
   editor: TipTapEditor | null;
@@ -46,6 +47,9 @@ export function Editor({
 }: EditorProps) {
   const padding = paddingClasses[contentPadding];
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Wide tables and code blocks grow past the column but must stay inside the pane
+  useWideBlockBounds(editor, containerRef);
 
   // Card mode: full styling with background, shadow, rounded corners
   const cardClasses = showCard

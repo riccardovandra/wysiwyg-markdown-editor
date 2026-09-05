@@ -823,15 +823,14 @@ body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-selector-id,
 /* ============================================
    Wide blocks: tables and code blocks (Bug #1)
    Wide content used to overflow the reading column and force the whole
-   page to scroll sideways. Wide blocks now grow past the column, stay
-   centered on the viewport, and cap at the viewport width. Anything still
-   wider than that scrolls inside its own box, never the page.
+   page to scroll sideways. Wide blocks grow past the column, stay centered
+   on the column, and cap at --wide-block-max. useWideBlockBounds measures
+   that cap from the pane: twice the distance from the column's center to
+   the nearer pane edge, so the block never leaves the pane even when the
+   comment gutter shifts the card off-center (content left of the pane can
+   never be scrolled into view). Anything still wider than the cap scrolls
+   inside its own box, never the page.
    ============================================ */
-
-.ProseMirror {
-  /* Viewport width minus breathing room for the outer padding + scrollbar */
-  --wide-block-max: calc(100vw - 4rem);
-}
 
 .ProseMirror > .tableWrapper,
 .ProseMirror > pre {
@@ -841,7 +840,8 @@ body[data-vscode-theme-kind="vscode-high-contrast"] .hljs-selector-id,
   box-sizing: border-box;
   width: max-content;
   min-width: 100%;
-  max-width: var(--wide-block-max);
+  /* Fallback (before the hook has measured): viewport minus outer padding */
+  max-width: var(--wide-block-max, calc(100vw - 4rem));
 }
 
 .ProseMirror > .tableWrapper {
