@@ -136,7 +136,8 @@ export function CommentGutter({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [flashId, setFlashId] = useState<string | null>(null);
   const bubbleRefs = useRef(new Map<string, HTMLDivElement>());
-  const pendingDraftRef = useRef(false);
+  /** The open composer's target; kept in a ref so refresh() can position it on every transaction. */
+  const draftRef = useRef<Draft | null>(null);
   const visibleRef = useRef(visible);
   visibleRef.current = visible;
 
@@ -155,10 +156,14 @@ export function CommentGutter({
     next.forEach((item) => {
       nextTops[item.id] = topFor(item.from);
     });
+    // The composer follows its target so it stays where the reader is.
+    if (draftRef.current) {
+      nextTops.draft = topFor(draftRef.current.from);
+    }
     setItems(next);
     setRawTops(nextTops);
     const pane = containerRef.current.parentElement?.clientWidth ?? window.innerWidth;
-    const hasVisibleComments = (visibleRef.current && next.length > 0) || pendingDraftRef.current;
+    const hasVisibleComments = (visibleRef.current && next.length > 0) || draftRef.current !== null;
     const nextMode = pickLayoutMode(pane, hasVisibleComments);
     setMode(nextMode);
     // The wrapper reserves the gutter through this variable (see .comment-layout in index.css).
@@ -278,22 +283,23 @@ export function CommentGutter({
 
   const openComposer = useCallback(() => {
     if (!editor || !target) return;
-    if (target.anchorAfter !== undefined) {
-      setDraft({ kind: 'anchor', pos: target.anchorAfter, from: target.from });
-    } else {
-      editor.commands.setPendingComment({ from: target.from, to: target.to });
-      setDraft({ kind: 'range', from: target.from, to: target.to });
+    const next: Draft =
+      target.anchorAfter !== undefined
+        ? { kind: 'anchor', pos: target.anchorAfter, from: target.from }
+        : { kind: 'range', from: target.from, to: target.to };
+    draftRef.current = next;
+    setDraft(next);
+    if (next.kind === 'range') {
+      editor.commands.setPendingComment({ from: next.from, to: next.to });
     }
-    setRawTops((prev) => ({ ...prev, draft: target.top }));
     setTarget(null);
-    pendingDraftRef.current = true;
     refresh();
   }, [editor, target, refresh]);
 
   const cancelDraft = useCallback(() => {
     editor?.commands.setPendingComment(null);
+    draftRef.current = null;
     setDraft(null);
-    pendingDraftRef.current = false;
     refresh();
   }, [editor, refresh]);
 
@@ -308,8 +314,8 @@ export function CommentGutter({
         // Collapse the selection so the floating button does not reappear over the block.
         editor.chain().addCommentAnchor(draft.pos, note).setTextSelection(draft.from).focus().run();
       }
+      draftRef.current = null;
       setDraft(null);
-      pendingDraftRef.current = false;
       onCommentAdded?.();
     },
     [editor, draft, onCommentAdded],
@@ -431,7 +437,8 @@ function Composer({ top, left, onSubmit, onCancel, registerRef }: ComposerProps)
   const [text, setText] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   useEffect(() => {
-    textareaRef.current?.focus();
+    // The composer sits beside the selected text, which is already on screen.
+    textareaRef.current?.focus({ preventScroll: true });
   }, []);
   return (
     <div className="comment-bubble comment-composer" style={{ top, left }} ref={registerRef}>
