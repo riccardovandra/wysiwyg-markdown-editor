@@ -1,7 +1,7 @@
 {
-  "name": "wysiwyg-markdown-editor",
-  "displayName": "WYSIWYG Markdown Editor",
-  "description": "Easy to view and see markdown editor",
+  "name": "mark-up",
+  "displayName": "Mark-up",
+  "description": "Notion-like WYSIWYG Markdown extension",
   "version": "1.0.0",
   "publisher": "riccardovandra",
   "license": "MIT",
